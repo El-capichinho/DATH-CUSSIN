@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DATH CUSSIN – POS Terminal</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg:#0f172a;--surface:#1e293b;--surface2:#273548;--border:#334155;
+  --accent:#f59e0b;--accent2:#10b981;--danger:#ef4444;--info:#3b82f6;
+  --text:#f1f5f9;--muted:#94a3b8;--white:#ffffff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--accent);}
+.topbar-center{display:flex;gap:8px;}
+.tab-btn{padding:8px 18px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;}
+.tab-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.user-pill{background:var(--surface2);border:1px solid var(--border);padding:6px 14px;border-radius:30px;font-size:13px;color:var(--muted);}
+.logout-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;transition:all .2s;}
+.logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ── TABS ── */
+.tab-panel{display:none;} .tab-panel.active{display:block;}
+
+/* ── POS LAYOUT ── */
+.pos-wrap{display:grid;grid-template-columns:1fr 360px;height:calc(100vh - 57px);}
+.menu-panel{overflow-y:auto;padding:20px;}
+.cart-panel{border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);}
+
+/* Category filter */
+.cat-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.cat-btn{padding:6px 16px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:30px;font-size:13px;cursor:pointer;transition:all .2s;}
+.cat-btn.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
+
+/* Menu grid */
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.menu-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.menu-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.menu-card.out{opacity:.5;cursor:not-allowed;}
+.menu-card img{width:100%;height:120px;object-fit:cover;display:block;}
+.menu-card-body{padding:10px 12px;}
+.menu-card-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.menu-card-meta{display:flex;justify-content:space-between;align-items:center;}
+.menu-card-price{color:var(--accent);font-weight:700;font-size:15px;font-family:'Playfair Display',serif;}
+.stock-badge{font-size:11px;color:var(--muted);}
+.stock-low{color:#f97316;}
+
+/* Cart panel */
+.cart-header{padding:16px 18px;border-bottom:1px solid var(--border);}
+.cart-header h3{font-size:1rem;font-weight:700;color:var(--text);}
+.cart-items-list{flex:1;overflow-y:auto;padding:12px 18px;}
+.cart-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.cart-row:last-child{border-bottom:none;}
+.cart-row-name{flex:1;font-size:14px;color:var(--text);}
+.cart-row-name small{display:block;font-size:12px;color:var(--muted);}
+.q-ctrl{display:flex;align-items:center;gap:6px;}
+.q-btn{width:26px;height:26px;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:5px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.q-btn:hover{background:var(--accent);color:#000;border-color:var(--accent);}
+.q-num{min-width:22px;text-align:center;font-weight:700;font-size:14px;}
+.rm-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:2px 4px;}
+.cart-row-sub{font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap;}
+
+.cart-totals{padding:14px 18px;border-top:1px solid var(--border);}
+.tot-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);padding:3px 0;}
+.tot-row.grand{font-size:17px;font-weight:700;color:var(--text);padding-top:10px;border-top:1px solid var(--border);margin-top:6px;}
+.tot-row.grand span:last-child{color:var(--accent);font-family:'Playfair Display',serif;}
+
+.cart-actions{padding:14px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;}
+.notes-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;resize:none;width:100%;}
+.notes-input:focus{outline:none;border-color:var(--accent);}
+.sale-btn{background:var(--accent);color:#000;border:none;padding:13px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.sale-btn:hover{background:#d97706;}
+.sale-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+.clear-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:9px;border-radius:8px;font-size:14px;cursor:pointer;}
+.clear-btn:hover{border-color:var(--danger);color:var(--danger);}
+.empty-cart-msg{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-cart-msg .icon{font-size:3rem;display:block;margin-bottom:10px;opacity:.3;}
+
+/* ── DASHBOARD TAB ── */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;padding:24px;max-width:1400px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.stat-label{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;}
+.stat-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--accent);}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px;}
+.dash-section{padding:0 24px 24px;max-width:1400px;}
+.dash-section h3{font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--surface2);color:var(--muted);text-align:left;padding:10px 16px;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px;}
+td{padding:11px 16px;border-top:1px solid var(--border);color:var(--text);}
+tr:hover td{background:var(--surface2);}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.status-pending,.status-confirmed{background:#1e3a5f;color:#60a5fa;}
+.status-preparing{background:#3b2e0a;color:#fbbf24;}
+.status-ready{background:#0d3320;color:#34d399;}
+.status-delivered{background:#1a2e1a;color:#86efac;}
+.status-cancelled{background:#3b1212;color:#f87171;}
+.pos-badge{background:#2d1f5e;color:#a78bfa;} .online-badge{background:#1a3a2a;color:#4ade80;}
+
+/* ── ORDERS TAB ── */
+.orders-wrap{padding:24px;max-width:1400px;}
+.orders-toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:14px;}
+.refresh-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;}
+.patch-btn{background:var(--surface2);border:1px solid var(--border);color:var(--info);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:12px;}
+.del-order-btn{background:var(--surface2);border:1px solid var(--border);color:var(--danger);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:12px;}
+
+/* ── INVENTORY TAB ── */
+.inv-wrap{padding:24px;max-width:1400px;}
+.inv-toolbar{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+.add-item-btn{background:var(--accent);color:#000;border:none;padding:9px 20px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.inv-form{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:18px;display:none;}
+.inv-form.open{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-field{display:flex;flex-direction:column;gap:5px;}
+.form-field label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;}
+.form-field input,.form-field select,.form-field textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:14px;}
+.form-field input:focus,.form-field select:focus{outline:none;border-color:var(--accent);}
+.form-submit-row{grid-column:1/-1;display:flex;gap:10px;}
+.save-btn{background:var(--accent2);color:#000;border:none;padding:10px 24px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.cancel-form-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 18px;border-radius:7px;cursor:pointer;}
+.edit-btn{background:var(--surface2);border:1px solid var(--border);color:var(--info);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:12px;}
+.del-btn{background:var(--surface2);border:1px solid var(--border);color:var(--danger);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:12px;}
+
+/* Receipt modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:420px;width:90%;font-family:'DM Mono',monospace;}
+.receipt-header{text-align:center;border-bottom:1px dashed var(--border);padding-bottom:14px;margin-bottom:14px;}
+.receipt-title{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--accent);}
+.receipt-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.receipt-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--muted);}
+.receipt-row.item{color:var(--text);}
+.receipt-divider{border:none;border-top:1px dashed var(--border);margin:10px 0;}
+.receipt-total{display:flex;justify-content:space-between;font-size:17px;font-weight:700;color:var(--text);padding-top:8px;}
+.receipt-total span:last-child{color:var(--accent);}
+.modal-btns{display:flex;gap:10px;margin-top:20px;}
+.print-btn{flex:1;background:var(--accent);color:#000;border:none;padding:11px;border-radius:7px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 18px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{background:#10b981;color:#000;}
+.toast.err{background:#ef4444;color:#fff;}
+.toast.warn{background:#f59e0b;color:#000;}
+
+/* Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .5s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Loading screen */
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
+.loading-logo{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--accent);}
+.loading-sub{color:var(--muted);font-size:14px;}
+.loading-dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin:0 3px;animation:ldot .6s infinite alternate;}
+.loading-dots span:nth-child(2){animation-delay:.2s;}
+.loading-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes ldot{to{transform:translateY(-8px);opacity:.3;}}
+
+@media(max-width:768px){.pos-wrap{grid-template-columns:1fr;}.cart-panel{height:50vh;border-left:none;border-top:1px solid var(--border);}}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">DATH CUSSIN</div>
+  <div class="loading-sub">Loading POS Terminal…</div>
+  <div class="loading-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">🍽 DATH CUSSIN POS</div>
+  <div class="topbar-center">
+    <button class="tab-btn active" onclick="showTab('pos',this)">🧾 Sale</button>
+    <button class="tab-btn" onclick="showTab('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn" onclick="showTab('reservations',this)">📅 Reservations</button>
+    <button class="tab-btn" onclick="showTab('orders',this)">📋 Orders</button>
+    <button class="tab-btn" onclick="showTab('inventory',this)">📦 Inventory</button>
+  </div>
+  <div class="topbar-right">
+    <span class="user-pill" id="userPill">Loading…</span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- ══ POS SALE TAB ══ -->
+<div class="tab-panel active" id="tab-pos">
+  <div class="pos-wrap">
+    <!-- Menu -->
+    <div class="menu-panel">
+      <div class="cat-filter" id="catFilter"></div>
+      <div class="menu-grid" id="menuGrid"><p style="color:var(--muted)">Loading menu…</p></div>
+    </div>
+    <!-- Cart -->
+    <div class="cart-panel">
+      <div class="cart-header">
+        <h3>🛒 Current Sale <span id="cartCountBadge" style="color:var(--accent)"></span></h3>
+      </div>
+      <div class="cart-items-list" id="cartList">
+        <div class="empty-cart-msg"><span class="icon">🛒</span>Add items from the menu</div>
+      </div>
+      <div class="cart-totals" id="cartTotals" style="display:none">
+        <div class="tot-row"><span>Subtotal</span><span id="tSub">GH₵0</span></div>
+        <div class="tot-row"><span>Tax (12.5%)</span><span id="tTax">GH₵0</span></div>
+        <div class="tot-row grand"><span>TOTAL</span><span id="tTot">GH₵0</span></div>
+      </div>
+      <div class="cart-actions">
+        <textarea class="notes-input" id="saleNotes" rows="2" placeholder="Order notes (optional)…"></textarea>
+        <button class="sale-btn" id="saleBtn" onclick="processSale()">Process Sale</button>
+        <button class="clear-btn" onclick="clearCart()">Clear Cart</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD TAB ══ -->
+<div class="tab-panel" id="tab-dashboard">
+  <div class="dash-grid" id="dashStats"></div>
+  <div class="dash-section">
+    <h3>Recent Orders</h3>
+    <div class="table-wrap"><table id="recentOrdersTable">
+      <thead><tr><th>Order ID</th><th>Source</th><th>Status</th><th>Total</th><th>Date</th></tr></thead>
+      <tbody id="recentOrdersTbody"></tbody>
+    </table></div>
+  </div>
+  <div class="dash-section">
+    <h3>Top Selling Items</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Item</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+      <tbody id="topItemsTbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ RESERVATIONS TAB ══ -->
+<div class="tab-panel" id="tab-reservations">
+  <div class="dash-section" style="padding: 24px;">
+    <div style="display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+      <div class="form-group">
+        <label style="color:var(--muted);font-size:12px;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px;">Filter by Date</label>
+        <input type="date" id="reservationDateFilter" onchange="loadReservations()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;min-width:150px;">
+      </div>
+      <div class="form-group">
+        <label style="color:var(--muted);font-size:12px;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px;">Filter by Status</label>
+        <select id="reservationStatusFilter" onchange="loadReservations()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;min-width:150px;">
+          <option value="">All Statuses</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="checked-in">Checked In</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <button class="refresh-btn" onclick="loadReservations()" style="align-self:flex-end;">↻ Refresh</button>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Today's Reservations</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Table</th><th>Customer</th><th>Phone</th><th>Guests</th><th>Time</th><th>Status</th><th>Price</th><th>Actions</th></tr></thead>
+      <tbody id="reservationsTbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ ORDERS TAB ══ -->
+<div class="tab-panel" id="tab-orders">
+  <div class="orders-wrap">
+    <div class="orders-toolbar">
+      <select class="filter-select" id="orderStatusFilter" onchange="loadOrders()">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="preparing">Preparing</option>
+        <option value="ready">Ready</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select class="filter-select" id="orderSourceFilter" onchange="loadOrders()">
+        <option value="">All Sources</option>
+        <option value="online">Online</option>
+        <option value="pos">POS</option>
+      </select>
+      <button class="refresh-btn" onclick="loadOrders()">↻ Refresh</button>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Order ID</th><th>Source</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody id="ordersTbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ══ INVENTORY TAB ══ -->
+<div class="tab-panel" id="tab-inventory">
+  <div class="inv-wrap">
+    <div class="inv-toolbar">
+      <h3 style="color:var(--text);font-size:1rem;font-weight:700">Menu Items</h3>
+      <button class="add-item-btn" onclick="toggleItemForm()">+ Add Item</button>
+    </div>
+    <!-- Add/Edit form -->
+    <div class="inv-form" id="itemForm">
+      <div class="form-field"><label>Name *</label><input id="f-name" placeholder="Item name"/></div>
+      <div class="form-field"><label>Price (GH₵) *</label><input id="f-price" type="number" min="0" step="0.01" placeholder="0.00"/></div>
+      <div class="form-field"><label>Category *</label>
+        <select id="f-cat">
+          <option value="breakfast">Breakfast</option><option value="lunch">Lunch</option>
+          <option value="dinner">Dinner</option><option value="snack">Snack</option>
+          <option value="dessert">Dessert</option><option value="drinks">Drinks</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Stock</label><input id="f-stock" type="number" min="0" placeholder="99"/></div>
+      <div class="form-field" style="grid-column:1/-1"><label>Description</label><input id="f-desc" placeholder="Short description"/></div>
+      <div class="form-field" style="grid-column:1/-1"><label>Image URL</label><input id="f-img" placeholder="https://…"/></div>
+      <div class="form-submit-row">
+        <button class="save-btn" onclick="saveItem()">💾 Save Item</button>
+        <button class="cancel-form-btn" onclick="cancelItemForm()">Cancel</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Available</th><th>Actions</th></tr></thead>
+      <tbody id="invTbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="modal">
+    <div class="receipt-header">
+      <div class="receipt-title">DATH CUSSIN</div>
+      <div class="receipt-sub" id="rDate"></div>
+      <div class="receipt-sub" id="rOrderId"></div>
+    </div>
+    <div id="rItems"></div>
+    <hr class="receipt-divider"/>
+    <div class="receipt-row"><span>Subtotal</span><span id="rSub"></span></div>
+    <div class="receipt-row"><span>Tax (12.5%)</span><span id="rTax"></span></div>
+    <hr class="receipt-divider"/>
+    <div class="receipt-total"><span>TOTAL</span><span id="rTot"></span></div>
+    <div class="modal-btns">
+      <button class="print-btn" onclick="window.print()">🖨 Print</button>
+      <button class="close-btn" onclick="closeReceipt()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+var posCart = [];
+var allMenuItems = [];
+var editingItemId = null;
+
+// ── Auth check ─────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    var r = await fetch('/api/auth/me');
+    var d = await r.json();
+    if (!d.loggedIn || !['admin','staff'].includes(d.user.role)) {
+      window.location.href = '/index.html?next=/pos/';
+      return;
+    }
+    document.getElementById('userPill').textContent = d.user.username + ' · ' + d.user.role;
+  } catch(e) {
+    window.location.href = '/index.html';
+    return;
+  }
+  // Set date filter to today
+  var today = new Date().toISOString().split('T')[0];
+  var dateFilter = document.getElementById('reservationDateFilter');
+  if (dateFilter) {
+    dateFilter.value = today;
+    dateFilter.min = today;
+  }
+  await loadMenu();
+  document.getElementById('loadingScreen').style.display = 'none';
+}
+
+async function logout() {
+  await fetch('/api/auth/logout', {method:'POST'});
+  window.location.href = '/index.html';
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name==='dashboard') loadDashboard();
+  if (name==='reservations') loadReservations();
+  if (name==='orders') loadOrders();
+  if (name==='inventory') loadInventory();
+}
+
+// ── Menu ───────────────────────────────────────────────────────────────────
+async function loadMenu() {
+  var r = await fetch('/api/menu');
+  var d = await r.json();
+  allMenuItems = d.items || [];
+  renderCategoryFilter();
+  renderMenuGrid(allMenuItems);
+}
+
+function renderCategoryFilter() {
+  var cats = ['all'].concat([...new Set(allMenuItems.map(function(i){return i.category;}))]);
+  document.getElementById('catFilter').innerHTML = cats.map(function(c){
+    return '<button class="cat-btn'+(c==='all'?' active':'')+'" onclick="filterMenu(this,\''+c+'\')">'+c.charAt(0).toUpperCase()+c.slice(1)+'</button>';
+  }).join('');
+}
+
+function filterMenu(btn, cat) {
+  document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  var filtered = cat==='all' ? allMenuItems : allMenuItems.filter(function(i){return i.category===cat;});
+  renderMenuGrid(filtered);
+}
+
+function renderMenuGrid(items) {
+  document.getElementById('menuGrid').innerHTML = items.map(function(item){
+    var out = !item.available || item.stock === 0;
+    return '<div class="menu-card'+(out?' out':'')+'" onclick="'+(!out?'addToCart('+item.id+')':'')+'">'
+      +'<img src="'+(item.image_url)+'" alt="'+item.name+'" loading="lazy"/>'
+      +'<div class="menu-card-body">'
+      +'<div class="menu-card-name">'+item.name+'</div>'
+      +'<div class="menu-card-meta">'
+      +'<span class="menu-card-price">GH₵'+item.price.toFixed(2)+'</span>'
+      +'<span class="stock-badge'+(item.stock<10?' stock-low':'')+'">'+(out?'Out':''+item.stock+' left')+'</span>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+// ── Cart ───────────────────────────────────────────────────────────────────
+function addToCart(id) {
+  var item = allMenuItems.find(function(i){return i.id===id;});
+  if (!item||!item.available) return;
+  var existing = posCart.find(function(c){return c.id===id;});
+  if (existing) {
+    if (existing.quantity >= item.stock) { showToast('Max stock reached for '+item.name,'warn'); return; }
+    existing.quantity++;
+  } else {
+    posCart.push({id:item.id,name:item.name,price:item.price,quantity:1,stock:item.stock});
+  }
+  renderCart();
+  showToast(item.name+' added','ok');
+}
+
+function updateCartQty(id, delta) {
+  var i = posCart.findIndex(function(c){return c.id===id;});
+  if (i===-1) return;
+  posCart[i].quantity += delta;
+  if (posCart[i].quantity <= 0) posCart.splice(i,1);
+  renderCart();
+}
+
+function clearCart() { posCart=[]; renderCart(); }
+
+function renderCart() {
+  var list = document.getElementById('cartList');
+  var totDiv = document.getElementById('cartTotals');
+  if (posCart.length===0) {
+    list.innerHTML='<div class="empty-cart-msg"><span class="icon">🛒</span>Add items from the menu</div>';
+    totDiv.style.display='none';
+    document.getElementById('saleBtn').disabled=true;
+    document.getElementById('cartCountBadge').textContent='';
+    return;
+  }
+  list.innerHTML = posCart.map(function(c){
+    return '<div class="cart-row">'
+      +'<div class="cart-row-name">'+c.name+'<small>GH₵'+c.price.toFixed(2)+' each</small></div>'
+      +'<div class="q-ctrl">'
+      +'<button class="q-btn" onclick="updateCartQty('+c.id+',-1)">−</button>'
+      +'<span class="q-num">'+c.quantity+'</span>'
+      +'<button class="q-btn" onclick="updateCartQty('+c.id+',1)">+</button>'
+      +'</div>'
+      +'<span class="cart-row-sub">GH₵'+(c.price*c.quantity).toFixed(2)+'</span>'
+      +'<button class="rm-btn" onclick="updateCartQty('+c.id+', -'+c.quantity+')">✕</button>'
+      +'</div>';
+  }).join('');
+  var sub = posCart.reduce(function(s,c){return s+c.price*c.quantity;},0);
+  var tax = sub*0.125;
+  var tot = sub+tax;
+  document.getElementById('tSub').textContent = 'GH₵'+sub.toFixed(2);
+  document.getElementById('tTax').textContent = 'GH₵'+tax.toFixed(2);
+  document.getElementById('tTot').textContent = 'GH₵'+tot.toFixed(2);
+  totDiv.style.display='block';
+  document.getElementById('saleBtn').disabled=false;
+  var count = posCart.reduce(function(s,c){return s+c.quantity;},0);
+  document.getElementById('cartCountBadge').textContent='('+count+')';
+}
+
+// ── Process Sale ───────────────────────────────────────────────────────────
+async function processSale() {
+  if (posCart.length===0) return;
+  var btn = document.getElementById('saleBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Processing…';
+  var notes = document.getElementById('saleNotes').value;
+  try {
+    var r = await fetch('/api/pos/sale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart:posCart,notes})});
+    var d = await r.json();
+    if (d.success) {
+      showReceipt(d.order);
+      clearCart();
+      document.getElementById('saleNotes').value='';
+      await loadMenu(); // refresh stock
+    } else {
+      showToast(d.message,'err');
+    }
+  } catch(e) { showToast('Server error','err'); }
+  btn.disabled=false;
+  btn.innerHTML='Process Sale';
+}
+
+// ── Receipt ────────────────────────────────────────────────────────────────
+function showReceipt(order) {
+  document.getElementById('rDate').textContent = new Date(order.created_at).toLocaleString();
+  document.getElementById('rOrderId').textContent = order.id;
+  document.getElementById('rItems').innerHTML = order.items.map(function(i){
+    return '<div class="receipt-row item"><span>'+i.name+' × '+i.quantity+'</span><span>GH₵'+i.subtotal.toFixed(2)+'</span></div>';
+  }).join('');
+  document.getElementById('rSub').textContent = 'GH₵'+order.subtotal.toFixed(2);
+  document.getElementById('rTax').textContent = 'GH₵'+order.tax.toFixed(2);
+  document.getElementById('rTot').textContent = 'GH₵'+order.total.toFixed(2);
+  document.getElementById('receiptModal').classList.add('open');
+}
+function closeReceipt() { document.getElementById('receiptModal').classList.remove('open'); }
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  var r = await fetch('/api/pos/summary');
+  var d = await r.json();
+  if (!d.success) return;
+  var s = d.summary;
+  document.getElementById('dashStats').innerHTML = [
+    {label:"Today's Sales",value:'GH₵'+s.todayTotal.toFixed(2),sub:s.todayCount+' orders today'},
+    {label:'Week Revenue',value:'GH₵'+s.weekTotal.toFixed(2),sub:'Last 7 days'},
+    {label:'Active Orders',value:s.pending,sub:'Pending / preparing'},
+    {label:'Low Stock Items',value:s.lowStock.length,sub:'Below 10 units'},
+  ].map(function(c){
+    return '<div class="stat-card"><div class="stat-label">'+c.label+'</div><div class="stat-value">'+c.value+'</div><div class="stat-sub">'+c.sub+'</div></div>';
+  }).join('');
+  document.getElementById('recentOrdersTbody').innerHTML = s.recentOrders.map(function(o){
+    return '<tr><td style="font-family:\'DM Mono\',monospace;font-size:12px">'+o.id+'</td>'
+      +'<td><span class="status-badge '+(o.source==='pos'?'pos-badge':'online-badge')+'">'+o.source+'</span></td>'
+      +'<td><span class="status-badge status-'+o.status+'">'+o.status+'</span></td>'
+      +'<td>GH₵'+o.total.toFixed(2)+'</td>'
+      +'<td>'+new Date(o.created_at).toLocaleDateString()+'</td></tr>';
+  }).join('');
+  document.getElementById('topItemsTbody').innerHTML = s.topItems.map(function(i){
+    return '<tr><td>'+i.name+'</td><td>'+i.qty+'</td><td>GH₵'+i.revenue.toFixed(2)+'</td></tr>';
+  }).join('');
+}
+
+// ── Orders ─────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  var statusF = document.getElementById('orderStatusFilter').value;
+  var sourceF = document.getElementById('orderSourceFilter').value;
+  var r = await fetch('/api/orders');
+  var d = await r.json();
+  if (!d.success) return;
+  var orders = d.orders.filter(function(o){
+    return (!statusF||o.status===statusF)&&(!sourceF||o.source===sourceF);
+  });
+  document.getElementById('ordersTbody').innerHTML = orders.map(function(o){
+    return '<tr>'
+      +'<td style="font-family:\'DM Mono\',monospace;font-size:12px">'+o.id+'</td>'
+      +'<td><span class="status-badge '+(o.source==='pos'?'pos-badge':'online-badge')+'">'+o.source+'</span></td>'
+      +'<td>'+(o.items?o.items.length:0)+' items</td>'
+      +'<td>GH₵'+o.total.toFixed(2)+'</td>'
+      +'<td><span class="status-badge status-'+o.status+'">'+o.status+'</span></td>'
+      +'<td>'+new Date(o.created_at).toLocaleString()+'</td>'
+      +'<td style="display:flex;gap:6px;flex-wrap:wrap">'
+      +'<button class="patch-btn" onclick="updateOrderStatus(\''+o.id+'\')">Update</button>'
+      +'<button class="del-order-btn" onclick="deleteOrder(\''+o.id+'\')">Delete</button>'
+      +'</td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No orders found</td></tr>';
+}
+
+async function updateOrderStatus(id) {
+  var s = prompt('New status:\npending / confirmed / preparing / ready / delivered / cancelled');
+  if (!s) return;
+  var r = await fetch('/api/orders/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s})});
+  var d = await r.json();
+  if (d.success) { showToast('Status updated','ok'); loadOrders(); }
+  else showToast(d.message,'err');
+}
+
+async function deleteOrder(id) {
+  if (!confirm('Delete order '+id+'?\nStock will be restored.')) return;
+  var r = await fetch('/api/orders/'+id,{method:'DELETE'});
+  var d = await r.json();
+  if (d.success) { showToast('Order deleted','ok'); loadOrders(); }
+  else showToast(d.message,'err');
+}
+
+// ── Reservations ───────────────────────────────────────────────────────────
+async function loadReservations() {
+  var dateFilter = document.getElementById('reservationDateFilter').value || new Date().toISOString().split('T')[0];
+  var statusFilter = document.getElementById('reservationStatusFilter').value || '';
+  var r = await fetch('/api/reservations?date='+dateFilter);
+  var d = await r.json();
+  if (!d.success) return;
+  var reservations = d.reservations.filter(function(res){
+    return !statusFilter || res.status === statusFilter;
+  });
+  document.getElementById('reservationsTbody').innerHTML = reservations.map(function(res){
+    return '<tr>'
+      +'<td><strong>'+res.table_number+'</strong></td>'
+      +'<td>'+res.customer_name+'</td>'
+      +'<td>'+(res.customer_phone||'—')+'</td>'
+      +'<td>'+res.guest_count+'</td>'
+      +'<td>'+res.reservation_time+'</td>'
+      +'<td><span class="status-badge status-'+res.status+'">'+res.status+'</span></td>'
+      +'<td>GH₵'+res.price.toFixed(2)+'</td>'
+      +'<td style="display:flex;gap:6px;flex-wrap:wrap;font-size:13px">'
+      +'<button class="patch-btn" onclick="updateReservationStatus(\''+res.id+'\')">Update</button>'
+      +'</td></tr>';
+  }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px">No reservations for this date</td></tr>';
+}
+
+async function updateReservationStatus(id) {
+  var s = prompt('New status:\nconfirmed / checked-in / completed / cancelled');
+  if (!s) return;
+  var r = await fetch('/api/reservations/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s})});
+  var d = await r.json();
+  if (d.success) { showToast('Reservation status updated','ok'); loadReservations(); }
+  else showToast(d.message,'err');
+}
+
+// ── Inventory ──────────────────────────────────────────────────────────────
+async function loadInventory() {
+  var r = await fetch('/api/menu');
+  var d = await r.json();
+  allMenuItems = d.items||[];
+  document.getElementById('invTbody').innerHTML = allMenuItems.map(function(item){
+    return '<tr>'
+      +'<td>'+item.id+'</td>'
+      +'<td>'+item.name+'</td>'
+      +'<td>'+item.category+'</td>'
+      +'<td>GH₵'+item.price.toFixed(2)+'</td>'
+      +'<td class="'+(item.stock<10?'stock-low':'')+'">'+item.stock+'</td>'
+      +'<td>'+(item.available?'<span style="color:var(--accent2)">Yes</span>':'<span style="color:var(--danger)">No</span>')+'</td>'
+      +'<td style="display:flex;gap:6px">'
+      +'<button class="edit-btn" onclick="editItem('+item.id+')">Edit</button>'
+      +'<button class="del-btn" onclick="deleteItem('+item.id+')">Delete</button>'
+      +'</td></tr>';
+  }).join('');
+}
+
+function toggleItemForm() {
+  editingItemId=null;
+  ['f-name','f-price','f-stock','f-desc','f-img'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('f-cat').value='lunch';
+  document.getElementById('itemForm').classList.toggle('open');
+}
+function cancelItemForm() { document.getElementById('itemForm').classList.remove('open'); editingItemId=null; }
+
+function editItem(id) {
+  var item = allMenuItems.find(function(i){return i.id===id;});
+  if (!item) return;
+  editingItemId=id;
+  document.getElementById('f-name').value = item.name;
+  document.getElementById('f-price').value = item.price;
+  document.getElementById('f-cat').value = item.category;
+  document.getElementById('f-stock').value = item.stock;
+  document.getElementById('f-desc').value = item.description||'';
+  document.getElementById('f-img').value = item.image_url||'';
+  document.getElementById('itemForm').classList.add('open');
+  document.getElementById('itemForm').scrollIntoView({behavior:'smooth'});
+}
+
+async function saveItem() {
+  var payload = {
+    name: document.getElementById('f-name').value.trim(),
+    price: parseFloat(document.getElementById('f-price').value),
+    category: document.getElementById('f-cat').value,
+    stock: parseInt(document.getElementById('f-stock').value)||99,
+    description: document.getElementById('f-desc').value.trim(),
+    image_url: document.getElementById('f-img').value.trim(),
+    available: 1
+  };
+  if (!payload.name||isNaN(payload.price)) { showToast('Name and price required','err'); return; }
+  var url = editingItemId ? '/api/menu/'+editingItemId : '/api/menu';
+  var method = editingItemId ? 'PUT' : 'POST';
+  var r = await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  var d = await r.json();
+  if (d.success) {
+    showToast(editingItemId?'Item updated':'Item created','ok');
+    cancelItemForm();
+    loadInventory();
+    loadMenu();
+  } else showToast(d.message,'err');
+}
+
+async function deleteItem(id) {
+  if (!confirm('Delete this menu item?')) return;
+  var r = await fetch('/api/menu/'+id,{method:'DELETE'});
+  var d = await r.json();
+  if (d.success) { showToast('Item deleted','ok'); loadInventory(); loadMenu(); }
+  else showToast(d.message,'err');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast '+type+' show';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

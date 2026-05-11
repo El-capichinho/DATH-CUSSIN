@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "database": "${workspaceFolder:dathcussin}/data/dathcussin.db",
+            "name": "DATH CUSSIN"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

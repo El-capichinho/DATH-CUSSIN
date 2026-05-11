@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DATH CUSSIN – Sign Up</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="auth-wrapper">
+    <form id="signupForm" class="form-container" novalidate>
+
+      <div class="logo">
+        <img src="https://image2url.com/r2/default/images/1767372887218-4e5e8596-eac1-47c8-8aca-d7a5f655a832.png" alt="DATH CUSSIN Logo" />
+      </div>
+
+      <h1>Create Account</h1>
+      <p>Join us and start ordering today.</p>
+
+      <div id="errorMessage" class="error-msg"></div>
+      <div id="successMessage" class="success-msg"></div>
+
+      <div class="form-group">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" id="username" class="form-control" placeholder="Choose a username" required autocomplete="username" />
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="Enter your email" required autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="Choose a password (min 6 chars)" required autocomplete="new-password" />
+        <div id="strengthBar" style="margin-top:6px;height:4px;border-radius:4px;background:#e5e5e5;overflow:hidden;">
+          <div id="strengthFill" style="height:100%;width:0;transition:all 0.3s;border-radius:4px;"></div>
+        </div>
+        <small id="strengthText" style="font-size:0.78rem;color:#9ca3af;margin-top:3px;display:block;"></small>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label">Confirm Password</label>
+        <input type="password" id="confirmPassword" class="form-control" placeholder="Repeat your password" required autocomplete="new-password" />
+      </div>
+
+      <button type="submit" class="login-btn" id="submitBtn">Sign Up</button>
+
+      <div class="auth-switch">
+        <p>Already have an account? <a href="/">Login</a></p>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+      const val = this.value;
+      const fill = document.getElementById('strengthFill');
+      const text = document.getElementById('strengthText');
+      let strength = 0;
+      if (val.length >= 6) strength++;
+      if (val.length >= 10) strength++;
+      if (/[A-Z]/.test(val)) strength++;
+      if (/[0-9]/.test(val)) strength++;
+      if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+      const levels = [
+        { pct: '0%', color: '#e5e5e5', label: '' },
+        { pct: '25%', color: '#ef4444', label: 'Weak' },
+        { pct: '50%', color: '#f97316', label: 'Fair' },
+        { pct: '75%', color: '#eab308', label: 'Good' },
+        { pct: '100%', color: '#22c55e', label: 'Strong' },
+        { pct: '100%', color: '#16a34a', label: 'Very Strong' }
+      ];
+      const level = levels[Math.min(strength, 5)];
+      fill.style.width = level.pct;
+      fill.style.background = level.color;
+      text.textContent = level.label;
+      text.style.color = level.color;
+    });
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const errorEl = document.getElementById('errorMessage');
+      const successEl = document.getElementById('successMessage');
+      const btn = document.getElementById('submitBtn');
+
+      // Client-side validation
+      if (!username || !email || !password || !confirmPassword) {
+        return showError('Please fill in all fields.');
+      }
+      if (username.length < 2) return showError('Username must be at least 2 characters.');
+      if (password.length < 6) return showError('Password must be at least 6 characters.');
+      if (password !== confirmPassword) return showError('Passwords do not match.');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Creating account…';
+
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          successEl.textContent = '✓ Account created! Redirecting…';
+          successEl.style.display = 'block';
+          setTimeout(() => window.location.href = '/pages/home.html', 1200);
+        } else {
+          showError(data.message || 'Could not create account.');
+          resetBtn();
+        }
+      } catch (err) {
+        showError('Unable to connect to server. Please try again.');
+        resetBtn();
+      }
+
+      function showError(msg) {
+        errorEl.textContent = '❌ ' + msg;
+        errorEl.style.display = 'block';
+        setTimeout(() => errorEl.style.display = 'none', 4000);
+      }
+
+      function resetBtn() {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign Up';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DATH CUSSIN-Login</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <div class="auth-wrapper">
+    <form id="loginForm" class="form-container" novalidate>
+
+      <div class="logo">
+        <img src="https://image2url.com/r2/default/images/1767372887218-4e5e8596-eac1-47c8-8aca-d7a5f655a832.png"
+          alt="DATH CUSSIN Logo" />
+      </div>
+
+      <h1>Welcome Back!</h1>
+      <p>Please login to your account.</p>
+
+      <div id="errorMessage" class="error-msg"></div>
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="Enter your email" required
+          autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="Enter your password" required
+          autocomplete="current-password" />
+      </div>
+
+      <a href="#" class="forgot-link">Forgot Password?</a>
+
+      <button type="submit" class="login-btn" id="submitBtn">Login</button>
+
+      <div class="auth-switch">
+        <p>Don't have an account? <a href="/pages/signup.html">Sign Up</a></p>
+      </div>
+
+      <div class="login-info">
+        <h2>🔑 Demo Credentials</h2>
+        <p>Email: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
+              data-cfemail="167579797d56717b777f7a3875797b">[email&#160;protected]</a></strong></p>
+        <p>Password: <strong>cook1234</strong></p>
+      </div>
+    </form>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script>
+    // Check if already logged in
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.loggedIn) window.location.href = '/pages/home.html';
+      } catch { }
+    }
+    checkAuth();
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('errorMessage');
+      const btn = document.getElementById('submitBtn');
+
+      // Client-side validation
+      if (!email || !password) {
+        showError('Please fill in all fields.');
+        return;
+      }
+
+      // Loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Logging in…';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          btn.innerHTML = '✓ Success!';
+          btn.style.backgroundColor = '#22c55e';
+          setTimeout(() => window.location.href = '/pages/home.html', 600);
+        } else {
+          showError(data.message || 'Invalid email or password.');
+          resetBtn();
+        }
+      } catch (err) {
+        showError('Unable to connect to server. Please try again.');
+        resetBtn();
+      }
+
+      function showError(msg) {
+        errorEl.textContent = '❌ ' + msg;
+        errorEl.style.display = 'block';
+        setTimeout(() => errorEl.style.display = 'none', 4000);
+      }
+
+      function resetBtn() {
+        btn.disabled = false;
+        btn.innerHTML = 'Login';
+      }
+    });
+  </script>
+</body>
+
+</html>
