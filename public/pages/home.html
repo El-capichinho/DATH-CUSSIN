@@ -71,6 +71,7 @@
       background-color: var(--gray-50);
       background-image: url('https://image2url.com/r2/default/images/1767373054909-68d9bc27-bd80-4c0f-9367-1f0bd0f46ea6.png');
       background-size: cover;
+      background: blur;
       background-attachment: fixed;
       min-height: 100vh;
     }
@@ -241,28 +242,39 @@
     /* ── Page Header ── */
     .page-header {
       max-width: 1380px;
-      margin: 0 auto 28px;
+     margin-bottom: auto;
+      background-color:var(--cream);
+      width: 100%;
+      top: 0;
+      left:0;
+      border-radius: 20px;
     }
 
     .page-header h2 {
       font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      color: #1a1a1a;
-      margin-bottom: 6px;
+      font-size: 50px;
+      color:#070707;
+      text-align: center;
+      
     }
 
     .page-header p {
-      color: #6b7280;
+      color: #000000;
       font-size: 1rem;
+      margin:auto;
+      text-align: center;
     }
 
     /* ── Category Filter ── */
     .category-filter {
       display: flex;
-      gap: 8px;
+      gap: 20px;
       flex-wrap: wrap;
+      justify-content:  space-between ;
+      justify-content: center;
       margin-bottom: 24px;
       max-width: 1380px;
+      margin-top: 24px;
       margin-left: auto;
       margin-right: auto;
       margin-bottom: 24px;
