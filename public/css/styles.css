@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
 
+/* ── Design Tokens ─────────────────────────────────────────────────── */
 :root {
   --cream: #f5f0e6;
   --brown: #8b4513;
@@ -17,22 +18,31 @@
   --gray-400: #9ca3af;
   --gray-600: #4b5563;
   --gray-800: #1f2937;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow: 0 4px 12px rgba(0,0,0,0.10);
   --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
   --radius: 8px;
   --radius-lg: 12px;
+
+  /* Focus ring */
+  --focus: 0 0 0 3px rgba(30,58,138,0.35);
+
+  /* Transition */
+  --t: 0.2s ease;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ── Reduced Motion ────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* ── Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
 body {
   font-family: 'DM Sans', sans-serif;
@@ -47,7 +57,22 @@ body {
   align-items: center;
 }
 
-/* ─── Auth Pages ─────────────────────────────────────── */
+/* ── Skip Link (Accessibility) ─────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -999px;
+  left: 0;
+  padding: 8px 16px;
+  background: var(--navy);
+  color: white;
+  font-weight: 600;
+  z-index: 10000;
+  border-radius: 0 0 var(--radius) 0;
+  transition: top var(--t);
+}
+.skip-link:focus { top: 0; }
+
+/* ── Auth Layout ─────────────────────────────────────────────────────── */
 .auth-wrapper {
   width: 100%;
   min-height: 100vh;
@@ -58,14 +83,20 @@ body {
 }
 
 .form-container {
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(12px);
   box-shadow: var(--shadow-lg);
   padding: 2.5rem;
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 460px;
   border: 1px solid rgba(255,255,255,0.8);
+  animation: slideUp 0.4s ease both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .logo {
@@ -73,7 +104,6 @@ body {
   justify-content: center;
   margin-bottom: 1.5rem;
 }
-
 .logo img {
   max-width: 140px;
   height: auto;
@@ -88,7 +118,6 @@ body {
   text-align: center;
   margin-bottom: 0.4rem;
 }
-
 .form-container > p {
   text-align: center;
   color: var(--gray-600);
@@ -96,9 +125,8 @@ body {
   font-size: 0.95rem;
 }
 
-.form-group {
-  margin-bottom: 1.2rem;
-}
+/* ── Form Controls ───────────────────────────────────────────────────── */
+.form-group { margin-bottom: 1.2rem; }
 
 .form-label {
   display: block;
@@ -116,32 +144,21 @@ body {
   font-family: 'DM Sans', sans-serif;
   font-size: 0.95rem;
   color: var(--gray-800);
-  transition: border-color 0.2s, box-shadow 0.2s;
   background: white;
+  transition: border-color var(--t), box-shadow var(--t);
 }
-
+.form-control:hover { border-color: var(--tan); }
 .form-control:focus {
   outline: none;
   border-color: var(--navy);
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+  box-shadow: var(--focus);
+}
+.form-control[aria-invalid="true"] {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.2);
 }
 
-.form-control:hover {
-  border-color: var(--tan);
-}
-
-.forgot-link {
-  display: block;
-  text-align: right;
-  font-size: 0.85rem;
-  color: var(--navy);
-  text-decoration: none;
-  margin-top: -0.5rem;
-  margin-bottom: 1rem;
-}
-
-.forgot-link:hover { text-decoration: underline; }
-
+/* ── Buttons ────────────────────────────────────────────────────────── */
 .login-btn {
   width: 100%;
   background-color: var(--navy);
@@ -154,15 +171,31 @@ body {
   font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   letter-spacing: 0.3px;
-  transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: background-color var(--t), transform 0.15s, box-shadow var(--t);
 }
-
-.login-btn:hover {
+.login-btn:hover:not(:disabled) {
   background-color: var(--dark-navy);
-  box-shadow: 0 4px 15px rgba(30, 58, 138, 0.35);
+  box-shadow: 0 4px 15px rgba(30,58,138,0.35);
+}
+.login-btn:active:not(:disabled) { transform: scale(0.98); }
+.login-btn:focus-visible { outline: none; box-shadow: var(--focus); }
+.login-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
-.login-btn:active { transform: scale(0.98); }
+/* ── Forgot / Links ─────────────────────────────────────────────────── */
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--navy);
+  text-decoration: none;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+.forgot-link:hover { text-decoration: underline; }
+.forgot-link:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 2px; }
 
 .auth-switch {
   text-align: center;
@@ -170,7 +203,6 @@ body {
   font-size: 0.9rem;
   color: var(--gray-600);
 }
-
 .auth-switch a {
   color: var(--navy);
   font-weight: 600;
@@ -178,6 +210,7 @@ body {
 }
 .auth-switch a:hover { text-decoration: underline; }
 
+/* ── Demo Credentials Box ────────────────────────────────────────────── */
 .login-info {
   margin-top: 1.5rem;
   padding: 1rem 1.2rem;
@@ -187,14 +220,13 @@ body {
   font-size: 0.85rem;
   color: var(--gray-800);
 }
-
 .login-info h2 {
   font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 0.3rem;
-  color: var(--gray-800);
 }
 
+/* ── Alert Messages ─────────────────────────────────────────────────── */
 .error-msg {
   background: #fef2f2;
   border: 1px solid #fecaca;
@@ -206,7 +238,6 @@ body {
   display: none;
   animation: slideIn 0.25s ease;
 }
-
 .success-msg {
   background: #f0fdf4;
   border: 1px solid #bbf7d0;
@@ -219,21 +250,10 @@ body {
   animation: slideIn 0.25s ease;
 }
 
-.redirect {
-  display: block;
-  text-align: center;
-  margin-top: 1rem;
-  color: var(--navy);
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-.redirect:hover { text-decoration: underline; }
-
-/* Loading spinner */
+/* ── Spinner ────────────────────────────────────────────────────────── */
 .spinner {
   display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   border: 2px solid rgba(255,255,255,0.4);
   border-top-color: white;
   border-radius: 50%;
@@ -241,18 +261,36 @@ body {
   vertical-align: middle;
   margin-right: 6px;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── Animations ──────────────────────────────────────── */
+/* ── Animations ─────────────────────────────────────────────────────── */
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* ── Password Strength ───────────────────────────────────────────────── */
+.strength-bar-track {
+  margin-top: 6px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--gray-200);
+  overflow: hidden;
+}
+.strength-bar-fill {
+  height: 100%;
+  width: 0;
+  transition: width 0.3s ease, background 0.3s ease;
+  border-radius: 4px;
+}
+.strength-label {
+  font-size: 0.78rem;
+  margin-top: 3px;
+  display: block;
+  min-height: 1.1em;
 }
 
-/* ─── Responsive ──────────────────────────────────────── */
+/* ── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .form-container { padding: 1.8rem 1.5rem; }
   .form-container h1 { font-size: 1.6rem; }

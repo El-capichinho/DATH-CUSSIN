@@ -6,351 +6,157 @@
   <title>DATH CUSSIN – Shopping Cart</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
-
     :root {
-      --cream: #f5f0e6;
-      --brown: #8b4513;
-      --navy: #1e3a8a;
-      --dark-navy: #152a6b;
-      --tan: #d2b48c;
-      --orange: #d2691e;
+      --cream:#f5f0e6; --brown:#8b4513; --navy:#1e3a8a; --dark-navy:#152a6b;
+      --tan:#d2b48c; --orange:#d2691e; --focus:0 0 0 3px rgba(30,58,138,.35);
     }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      padding-top: 70px;
-      background-color: #fafafa;
-      min-height: 100vh;
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    .skip-link{position:absolute;top:-999px;left:0;padding:8px 16px;background:var(--navy);color:white;font-weight:600;z-index:10000;border-radius:0 0 8px 0}
+    .skip-link:focus{top:0}
+    body{font-family:'DM Sans',sans-serif;padding-top:70px;background-color:#fafafa;min-height:100vh}
+    .navbar{
+      position:fixed;top:0;left:0;width:100%;display:flex;justify-content:space-between;align-items:center;
+      background-color:var(--cream);padding:12px 28px;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:1000
     }
-
-    .navbar {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--cream);
-      padding: 12px 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      z-index: 1000;
+    .back-btn{
+      background-color:var(--navy);color:white;border:none;padding:10px 18px;font-size:15px;
+      font-family:'DM Sans',sans-serif;cursor:pointer;border-radius:6px;text-decoration:none;
+      display:inline-block;transition:background-color .2s
     }
-
-    .back-btn {
-      background-color: var(--navy);
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      font-size: 15px;
-      font-family: 'DM Sans', sans-serif;
-      cursor: pointer;
-      border-radius: 6px;
-      text-decoration: none;
-      display: inline-block;
-      transition: background-color 0.2s;
+    .back-btn:hover{background-color:var(--dark-navy)}
+    .back-btn:focus-visible{outline:none;box-shadow:var(--focus)}
+    .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--brown);letter-spacing:2px}
+    .cart-count{background-color:var(--tan);color:#1a1a1a;padding:10px 18px;font-size:15px;font-weight:700;border-radius:6px}
+    .container{max-width:1200px;margin:0 auto;padding:30px 24px}
+    .page-title{font-family:'Playfair Display',serif;font-size:2rem;color:#1a1a1a;margin-bottom:6px}
+    .page-subtitle{color:#6b7280;margin-bottom:28px}
+    .cart-layout{display:grid;grid-template-columns:1fr;gap:28px}
+    @media(min-width:900px){.cart-layout{grid-template-columns:2fr 1fr}}
+    .cart-items{background:white;border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+    .empty-cart{text-align:center;padding:70px 20px}
+    .empty-cart-icon{font-size:72px;margin-bottom:16px;opacity:.3}
+    .empty-cart h2{color:#4b5563;margin-bottom:8px;font-size:1.4rem}
+    .empty-cart p{color:#9ca3af;margin-bottom:28px}
+    .continue-btn{
+      background-color:var(--navy);color:white;border:none;padding:12px 32px;font-size:15px;
+      font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;border-radius:8px;
+      text-decoration:none;display:inline-block;transition:background-color .2s
     }
-    .back-btn:hover { background-color: var(--dark-navy); }
-
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--brown);
-      letter-spacing: 2px;
+    .continue-btn:hover{background-color:var(--dark-navy)}
+    .cart-item{display:flex;gap:18px;padding:18px 0;border-bottom:1px solid #f0f0f0;transition:background-color .15s}
+    .cart-item:last-child{border-bottom:none}
+    .item-image{width:110px;height:110px;object-fit:cover;border-radius:10px;flex-shrink:0}
+    .item-details{flex:1;display:flex;flex-direction:column;gap:5px}
+    .item-name{font-size:18px;font-weight:700;color:#1a1a1a}
+    .item-desc{color:#6b7280;font-size:13px}
+    .item-price{color:var(--orange);font-size:17px;font-weight:700;font-family:'Playfair Display',serif}
+    .item-actions{display:flex;align-items:center;gap:14px;margin-top:auto;flex-wrap:wrap}
+    .qty-control{display:flex;align-items:center;border:1.5px solid #e5e5e5;border-radius:8px;overflow:hidden}
+    .qty-btn{
+      background:#f9f9f9;border:none;width:36px;height:36px;cursor:pointer;font-size:18px;
+      display:flex;align-items:center;justify-content:center;transition:background-color .15s;font-weight:700
     }
-
-    .cart-count {
-      background-color: var(--tan);
-      color: #1a1a1a;
-      padding: 10px 18px;
-      font-size: 15px;
-      font-weight: 700;
-      border-radius: 6px;
+    .qty-btn:hover{background:#e5e5e5}
+    .qty-btn:focus-visible{outline:none;box-shadow:var(--focus)}
+    .qty-display{
+      min-width:38px;text-align:center;font-weight:700;font-size:15px;
+      border-left:1.5px solid #e5e5e5;border-right:1.5px solid #e5e5e5;
+      height:36px;line-height:36px;padding:0 4px
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 30px 24px;
+    .remove-btn{
+      background:#fef2f2;color:#ef4444;border:1px solid #fecaca;padding:7px 14px;
+      border-radius:7px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;
+      font-weight:600;transition:all .15s
     }
-
-    .page-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      color: #1a1a1a;
-      margin-bottom: 6px;
+    .remove-btn:hover{background:#ef4444;color:white;border-color:#ef4444}
+    .remove-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(239,68,68,.3)}
+    .item-total{font-size:17px;font-weight:700;color:#1a1a1a;margin-left:auto;align-self:center}
+    .order-summary{
+      background:white;border-radius:12px;padding:28px;
+      box-shadow:0 2px 12px rgba(0,0,0,.08);height:fit-content;position:sticky;top:90px
     }
-
-    .page-subtitle { color: #6b7280; margin-bottom: 28px; }
-
-    .cart-layout {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 28px;
+    .summary-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:#1a1a1a;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #f0f0f0}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;color:#6b7280;font-size:15px}
+    .summary-row.total{font-size:18px;font-weight:700;color:#1a1a1a;padding-top:14px;border-top:2px solid #f0f0f0;margin-top:8px}
+    .summary-row .amount{font-weight:700;color:#1a1a1a}
+    .summary-row.total .amount{color:var(--orange);font-size:22px;font-family:'Playfair Display',serif}
+    .delivery-note{font-size:12px;color:#9ca3af;margin-top:-6px;margin-bottom:4px;padding:0 0 4px}
+    .checkout-btn{
+      width:100%;background-color:var(--navy);color:white;border:none;padding:15px;
+      font-size:17px;font-family:'DM Sans',sans-serif;font-weight:700;border-radius:8px;
+      cursor:pointer;margin-top:20px;transition:background-color .2s,transform .15s;letter-spacing:.3px
     }
-    @media (min-width: 900px) {
-      .cart-layout { grid-template-columns: 2fr 1fr; }
+    .checkout-btn:hover:not(:disabled){background-color:var(--dark-navy)}
+    .checkout-btn:active:not(:disabled){transform:scale(.98)}
+    .checkout-btn:disabled{background-color:#d1d5db;cursor:not-allowed}
+    .checkout-btn:focus-visible{outline:none;box-shadow:var(--focus)}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .update-toast{
+      background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;
+      padding:12px 18px;border-radius:8px;margin-bottom:20px;display:none;font-size:14px;font-weight:500
     }
-
-    /* ── Items panel ── */
-    .cart-items {
-      background: white;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    .update-toast.show{display:block;animation:slideIn .25s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    /* Remove confirm overlay */
+    .remove-confirm{
+      position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:5000;
+      display:none;align-items:center;justify-content:center
     }
-
-    .empty-cart {
-      text-align: center;
-      padding: 70px 20px;
+    .remove-confirm.open{display:flex}
+    .remove-confirm-box{
+      background:white;border-radius:12px;padding:28px;max-width:360px;width:90%;text-align:center
     }
-    .empty-cart-icon { font-size: 72px; margin-bottom: 16px; opacity: 0.3; }
-    .empty-cart h2 { color: #4b5563; margin-bottom: 8px; font-size: 1.4rem; }
-    .empty-cart p { color: #9ca3af; margin-bottom: 28px; }
-
-    .continue-btn {
-      background-color: var(--navy);
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      font-size: 15px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 8px;
-      text-decoration: none;
-      display: inline-block;
-      transition: background-color 0.2s;
-    }
-    .continue-btn:hover { background-color: var(--dark-navy); }
-
-    .cart-item {
-      display: flex;
-      gap: 18px;
-      padding: 18px 0;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background-color 0.15s;
-    }
-    .cart-item:last-child { border-bottom: none; }
-
-    .item-image {
-      width: 110px;
-      height: 110px;
-      object-fit: cover;
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-
-    .item-details {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .item-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1a1a1a;
-    }
-
-    .item-desc { color: #6b7280; font-size: 13px; }
-
-    .item-price {
-      color: var(--orange);
-      font-size: 17px;
-      font-weight: 700;
-      font-family: 'Playfair Display', serif;
-    }
-
-    .item-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-top: auto;
-      flex-wrap: wrap;
-    }
-
-    .qty-control {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      border: 1.5px solid #e5e5e5;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .qty-btn {
-      background: #f9f9f9;
-      border: none;
-      width: 34px;
-      height: 34px;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.15s;
-      font-weight: 700;
-    }
-    .qty-btn:hover { background: #e5e5e5; }
-
-    .qty-display {
-      min-width: 36px;
-      text-align: center;
-      font-weight: 700;
-      font-size: 15px;
-      border-left: 1.5px solid #e5e5e5;
-      border-right: 1.5px solid #e5e5e5;
-      height: 34px;
-      line-height: 34px;
-    }
-
-    .remove-btn {
-      background: #fef2f2;
-      color: #ef4444;
-      border: 1px solid #fecaca;
-      padding: 7px 14px;
-      border-radius: 7px;
-      cursor: pointer;
-      font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 600;
-      transition: all 0.15s;
-    }
-    .remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
-
-    .item-total {
-      font-size: 17px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-left: auto;
-      align-self: center;
-    }
-
-    /* ── Order Summary ── */
-    .order-summary {
-      background: white;
-      border-radius: 12px;
-      padding: 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      height: fit-content;
-      position: sticky;
-      top: 90px;
-    }
-
-    .summary-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.5rem;
-      color: #1a1a1a;
-      margin-bottom: 20px;
-      padding-bottom: 14px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 11px 0;
-      color: #6b7280;
-      font-size: 15px;
-    }
-
-    .summary-row.total {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1a1a1a;
-      padding-top: 14px;
-      border-top: 2px solid #f0f0f0;
-      margin-top: 8px;
-    }
-
-    .summary-row .amount { font-weight: 700; color: #1a1a1a; }
-    .summary-row.total .amount { color: var(--orange); font-size: 22px; font-family: 'Playfair Display', serif; }
-
-    .checkout-btn {
-      width: 100%;
-      background-color: var(--navy);
-      color: white;
-      border: none;
-      padding: 15px;
-      font-size: 17px;
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background-color 0.2s, transform 0.15s;
-      letter-spacing: 0.3px;
-    }
-    .checkout-btn:hover:not(:disabled) { background-color: var(--dark-navy); }
-    .checkout-btn:active:not(:disabled) { transform: scale(0.98); }
-    .checkout-btn:disabled { background-color: #d1d5db; cursor: not-allowed; }
-
-    .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.4);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .update-toast {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #15803d;
-      padding: 12px 18px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-      font-size: 14px;
-      font-weight: 500;
-      animation: slideIn 0.25s ease;
-    }
-    .update-toast.show { display: block; }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 640px) {
-      .cart-item { flex-direction: column; }
-      .item-image { width: 100%; height: 180px; }
-      .item-total { margin-left: 0; }
+    .remove-confirm-box h3{margin-bottom:10px;color:#1a1a1a}
+    .remove-confirm-box p{color:#6b7280;margin-bottom:20px;font-size:14px}
+    .remove-confirm-btns{display:flex;gap:12px}
+    .rcb-cancel{flex:1;padding:11px;border:1.5px solid #e5e5e5;background:white;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .rcb-cancel:hover{background:#f5f5f5}
+    .rcb-remove{flex:1;padding:11px;border:none;background:#ef4444;color:white;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+    .rcb-remove:hover{background:#dc2626}
+    @media(max-width:640px){
+      .cart-item{flex-direction:column}
+      .item-image{width:100%;height:180px}
+      .item-total{margin-left:0}
     }
   </style>
 </head>
 <body>
-  <nav class="navbar">
+  <a href="#cartMain" class="skip-link">Skip to cart</a>
+
+  <nav class="navbar" aria-label="Navigation">
     <a class="back-btn" href="/pages/home.html">← Back to Menu</a>
     <span class="logo">DATH CUSSIN</span>
-    <div class="cart-count">
+    <div class="cart-count" aria-live="polite">
       <span id="cartItemCount">0</span> Items
     </div>
   </nav>
 
-  <div class="container">
+  <!-- Remove confirmation dialog -->
+  <div class="remove-confirm" id="removeConfirm" role="dialog" aria-modal="true" aria-label="Confirm removal">
+    <div class="remove-confirm-box">
+      <h3>Remove Item?</h3>
+      <p id="removeConfirmName">Are you sure you want to remove this item from your cart?</p>
+      <div class="remove-confirm-btns">
+        <button class="rcb-cancel" onclick="cancelRemove()">Cancel</button>
+        <button class="rcb-remove" onclick="confirmRemove()">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="cartMain" class="container">
     <h1 class="page-title">Shopping Cart</h1>
     <p class="page-subtitle">Review your order and proceed to checkout</p>
 
-    <div id="updateToast" class="update-toast">✓ Cart updated!</div>
+    <div id="updateToast" class="update-toast" role="status" aria-live="polite">✓ Cart updated!</div>
 
     <div class="cart-layout">
       <div class="cart-items">
         <div id="cartItemsContainer"></div>
       </div>
-
-      <div class="order-summary">
+      <div class="order-summary" aria-label="Order summary">
         <h2 class="summary-title">Order Summary</h2>
-
         <div class="summary-row">
           <span>Subtotal</span>
           <span class="amount" id="subtotal">GH₵0.00</span>
@@ -359,6 +165,7 @@
           <span>Delivery Fee</span>
           <span class="amount" id="deliveryFee">GH₵0.00</span>
         </div>
+        <p class="delivery-note">Flat rate GH₵10.00 for all orders</p>
         <div class="summary-row">
           <span>Tax (12.5%)</span>
           <span class="amount" id="tax">GH₵0.00</span>
@@ -367,57 +174,52 @@
           <span>Total</span>
           <span class="amount" id="total">GH₵0.00</span>
         </div>
-
         <button class="checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()">
           Proceed to Checkout
         </button>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
+    let pendingRemoveId = null;
+
     function getCart() { return JSON.parse(localStorage.getItem('cart') || '[]'); }
     function saveCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); }
 
-    function initCart() {
-      renderCartItems();
-      updateSummary();
-    }
+    function initCart() { renderCartItems(); updateSummary(); }
 
     function renderCartItems() {
       const container = document.getElementById('cartItemsContainer');
       const cart = getCart();
-
-      if (cart.length === 0) {
+      if (!cart.length) {
         container.innerHTML = `
           <div class="empty-cart">
-            <div class="empty-cart-icon">🛒</div>
+            <div class="empty-cart-icon" aria-hidden="true">🛒</div>
             <h2>Your cart is empty</h2>
             <p>Add some delicious dishes to get started!</p>
             <a href="/pages/home.html" class="continue-btn">Browse Menu</a>
           </div>`;
         return;
       }
-
       container.innerHTML = cart.map(item => `
         <div class="cart-item" id="item-${item.id}">
-          <img src="${item.image}" alt="${item.name}" class="item-image" />
+          <img src="${item.image_url || ''}" alt="${item.name}" class="item-image" loading="lazy" />
           <div class="item-details">
             <h3 class="item-name">${item.name}</h3>
-            <p class="item-desc">${item.description}</p>
-            <p class="item-price">GH₵${item.price.toFixed(2)} each</p>
+            <p class="item-desc">${item.description || ''}</p>
+            <p class="item-price">GH₵${Number(item.price).toFixed(2)} each</p>
             <div class="item-actions">
-              <div class="qty-control">
-                <button class="qty-btn" onclick="updateQty(${item.id}, -1)">−</button>
-                <span class="qty-display">${item.quantity}</span>
-                <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+              <div class="qty-control" role="group" aria-label="Quantity for ${item.name}">
+                <button class="qty-btn" onclick="updateQty(${item.id},-1)" aria-label="Decrease quantity">−</button>
+                <span class="qty-display" aria-label="${item.quantity}">${item.quantity}</span>
+                <button class="qty-btn" onclick="updateQty(${item.id},1)" aria-label="Increase quantity">+</button>
               </div>
-              <button class="remove-btn" onclick="removeItem(${item.id})">Remove</button>
-              <span class="item-total">GH₵${(item.price * item.quantity).toFixed(2)}</span>
+              <button class="remove-btn" onclick="askRemove(${item.id},'${item.name.replace(/'/g, "\\'")}')">Remove</button>
+              <span class="item-total" aria-label="Subtotal for ${item.name}">GH₵${(Number(item.price) * item.quantity).toFixed(2)}</span>
             </div>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
 
     function updateQty(id, delta) {
@@ -425,47 +227,59 @@
       const item = cart.find(i => i.id === id);
       if (!item) return;
       item.quantity += delta;
-      if (item.quantity <= 0) { removeItem(id); return; }
+      if (item.quantity <= 0) { cart = cart.filter(i => i.id !== id); }
       saveCart(cart);
       renderCartItems();
       updateSummary();
       showUpdateToast();
     }
 
-    function removeItem(id) {
-      let cart = getCart().filter(i => i.id !== id);
-      saveCart(cart);
-      renderCartItems();
-      updateSummary();
+    function askRemove(id, name) {
+      pendingRemoveId = id;
+      document.getElementById('removeConfirmName').textContent = `Remove "${name}" from your cart?`;
+      const d = document.getElementById('removeConfirm');
+      d.classList.add('open');
+      d.querySelector('.rcb-remove').focus();
     }
+    function cancelRemove() {
+      pendingRemoveId = null;
+      document.getElementById('removeConfirm').classList.remove('open');
+    }
+    function confirmRemove() {
+      if (pendingRemoveId !== null) {
+        saveCart(getCart().filter(i => i.id !== pendingRemoveId));
+        pendingRemoveId = null;
+        renderCartItems();
+        updateSummary();
+      }
+      document.getElementById('removeConfirm').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') cancelRemove();
+    });
 
     function updateSummary() {
       const cart = getCart();
-      const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+      const subtotal = cart.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
       const deliveryFee = cart.length > 0 ? 10 : 0;
       const tax = subtotal * 0.125;
       const total = subtotal + deliveryFee + tax;
-
       document.getElementById('subtotal').textContent = `GH₵${subtotal.toFixed(2)}`;
       document.getElementById('deliveryFee').textContent = `GH₵${deliveryFee.toFixed(2)}`;
       document.getElementById('tax').textContent = `GH₵${tax.toFixed(2)}`;
       document.getElementById('total').textContent = `GH₵${total.toFixed(2)}`;
-
       const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
       document.getElementById('cartItemCount').textContent = totalItems;
-
-      const btn = document.getElementById('checkoutBtn');
-      btn.disabled = cart.length === 0;
+      document.getElementById('checkoutBtn').disabled = !cart.length;
     }
 
     async function proceedToCheckout() {
       const cart = getCart();
-      if (cart.length === 0) return;
-
+      if (!cart.length) return;
       const btn = document.getElementById('checkoutBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Processing…';
-
+      btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Processing…';
       try {
         const res = await fetch('/api/orders', {
           method: 'POST',
@@ -473,12 +287,10 @@
           body: JSON.stringify({ cart })
         });
         const data = await res.json();
-
         if (data.success) {
-          // Store order for success page
           sessionStorage.setItem('lastOrder', JSON.stringify({
             orderId: data.order.id,
-            itemCount: cart.reduce((s, i) => s + i.quantity, 0),
+            itemCount: cart.reduce((s,i) => s+i.quantity, 0),
             subtotal: `GH₵${data.order.subtotal.toFixed(2)}`,
             deliveryFee: `GH₵${data.order.deliveryFee.toFixed(2)}`,
             tax: `GH₵${data.order.tax.toFixed(2)}`,
@@ -487,26 +299,39 @@
           localStorage.removeItem('cart');
           window.location.href = '/pages/success.html';
         } else {
-          alert(data.message || 'Checkout failed. Please try again.');
+          showCheckoutError(data.message || 'Checkout failed. Please try again.');
           btn.disabled = false;
           btn.innerHTML = 'Proceed to Checkout';
         }
-      } catch (err) {
-        // Fallback: store locally and redirect
-        const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-        const deliveryFee = 10;
-        const tax = subtotal * 0.125;
+      } catch {
+        // Offline fallback
+        const subtotal = cart.reduce((s,i) => s + Number(i.price)*i.quantity, 0);
+        const deliveryFee = 10, tax = subtotal*0.125;
         sessionStorage.setItem('lastOrder', JSON.stringify({
-          orderId: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
-          itemCount: cart.reduce((s, i) => s + i.quantity, 0),
+          orderId: 'ORD-' + Math.floor(100000 + Math.random()*900000),
+          itemCount: cart.reduce((s,i) => s+i.quantity,0),
           subtotal: `GH₵${subtotal.toFixed(2)}`,
           deliveryFee: `GH₵${deliveryFee.toFixed(2)}`,
           tax: `GH₵${tax.toFixed(2)}`,
-          total: `GH₵${(subtotal + deliveryFee + tax).toFixed(2)}`
+          total: `GH₵${(subtotal+deliveryFee+tax).toFixed(2)}`
         }));
         localStorage.removeItem('cart');
         window.location.href = '/pages/success.html';
       }
+    }
+
+    function showCheckoutError(msg) {
+      const t = document.getElementById('updateToast');
+      t.style.background = '#fef2f2';
+      t.style.borderColor = '#fecaca';
+      t.style.color = '#dc2626';
+      t.textContent = '❌ ' + msg;
+      t.classList.add('show');
+      setTimeout(() => {
+        t.classList.remove('show');
+        t.style.cssText = '';
+        t.textContent = '✓ Cart updated!';
+      }, 4000);
     }
 
     function showUpdateToast() {

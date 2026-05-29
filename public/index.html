@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DATH CUSSIN-Login</title>
+  <title>DATH CUSSIN – Login</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-
 <body>
+  <a href="#loginForm" class="skip-link">Skip to login form</a>
+
   <div class="auth-wrapper">
-    <form id="loginForm" class="form-container" novalidate>
+    <form id="loginForm" class="form-container" novalidate aria-label="Login form">
 
       <div class="logo">
         <img src="https://image2url.com/r2/default/images/1767372887218-4e5e8596-eac1-47c8-8aca-d7a5f655a832.png"
-          alt="DATH CUSSIN Logo" />
+             alt="DATH CUSSIN Logo" />
       </div>
 
       <h1>Welcome Back!</h1>
       <p>Please login to your account.</p>
 
-      <div id="errorMessage" class="error-msg"></div>
+      <div id="errorMessage" class="error-msg" role="alert" aria-live="assertive"></div>
 
       <div class="form-group">
         <label for="email" class="form-label">Email Address</label>
-        <input type="email" id="email" class="form-control" placeholder="Enter your email" required
-          autocomplete="email" />
+        <input type="email" id="email" class="form-control"
+               placeholder="Enter your email"
+               required autocomplete="email"
+               aria-required="true" aria-describedby="emailErr" />
+        <span id="emailErr" class="field-error" style="display:none;font-size:0.8rem;color:var(--red);margin-top:3px;"></span>
       </div>
 
       <div class="form-group">
         <label for="password" class="form-label">Password</label>
-        <input type="password" id="password" class="form-control" placeholder="Enter your password" required
-          autocomplete="current-password" />
+        <div style="position:relative;">
+          <input type="password" id="password" class="form-control"
+                 placeholder="Enter your password"
+                 required autocomplete="current-password"
+                 aria-required="true" style="padding-right:44px;" />
+          <button type="button" id="togglePwd" aria-label="Show password"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:4px;line-height:1;">👁</button>
+        </div>
       </div>
 
-      <a href="#" class="forgot-link">Forgot Password?</a>
+      <a href="#" class="forgot-link" aria-label="Reset your password">Forgot Password?</a>
 
       <button type="submit" class="login-btn" id="submitBtn">Login</button>
 
@@ -42,28 +51,34 @@
         <p>Don't have an account? <a href="/pages/signup.html">Sign Up</a></p>
       </div>
 
-      <div class="login-info">
+      <div class="login-info" role="note" aria-label="Demo credentials">
         <h2>🔑 Demo Credentials</h2>
-        <p>Email: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
-              data-cfemail="167579797d56717b777f7a3875797b">[email&#160;protected]</a></strong></p>
+        <p>Email: <strong>cook@gmail.com</strong></p>
         <p>Password: <strong>cook1234</strong></p>
       </div>
     </form>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
-    // Check if already logged in
-    async function checkAuth() {
+    // Redirect if already logged in
+    (async function checkAuth() {
       try {
         const res = await fetch('/api/auth/me');
         const data = await res.json();
         if (data.loggedIn) window.location.href = '/pages/home.html';
-      } catch { }
-    }
-    checkAuth();
+      } catch {}
+    })();
 
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    // Password visibility toggle
+    document.getElementById('togglePwd').addEventListener('click', function() {
+      const pwd = document.getElementById('password');
+      const isHidden = pwd.type === 'password';
+      pwd.type = isHidden ? 'text' : 'password';
+      this.textContent = isHidden ? '🙈' : '👁';
+      this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const email = document.getElementById('email').value.trim();
@@ -73,13 +88,14 @@
 
       // Client-side validation
       if (!email || !password) {
-        showError('Please fill in all fields.');
-        return;
+        return showError('Please fill in all fields.');
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return showError('Please enter a valid email address.');
       }
 
-      // Loading state
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Logging in…';
+      btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Logging in…';
 
       try {
         const res = await fetch('/api/auth/login', {
@@ -97,7 +113,7 @@
           showError(data.message || 'Invalid email or password.');
           resetBtn();
         }
-      } catch (err) {
+      } catch {
         showError('Unable to connect to server. Please try again.');
         resetBtn();
       }
@@ -105,15 +121,14 @@
       function showError(msg) {
         errorEl.textContent = '❌ ' + msg;
         errorEl.style.display = 'block';
-        setTimeout(() => errorEl.style.display = 'none', 4000);
+        setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
       }
-
       function resetBtn() {
         btn.disabled = false;
         btn.innerHTML = 'Login';
+        btn.style.backgroundColor = '';
       }
     });
   </script>
 </body>
-
 </html>

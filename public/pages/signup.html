@@ -7,44 +7,65 @@
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
+  <a href="#signupForm" class="skip-link">Skip to signup form</a>
+
   <div class="auth-wrapper">
-    <form id="signupForm" class="form-container" novalidate>
+    <form id="signupForm" class="form-container" novalidate aria-label="Create account form">
 
       <div class="logo">
-        <img src="https://image2url.com/r2/default/images/1767372887218-4e5e8596-eac1-47c8-8aca-d7a5f655a832.png" alt="DATH CUSSIN Logo" />
+        <img src="https://image2url.com/r2/default/images/1767372887218-4e5e8596-eac1-47c8-8aca-d7a5f655a832.png"
+             alt="DATH CUSSIN Logo" />
       </div>
 
       <h1>Create Account</h1>
       <p>Join us and start ordering today.</p>
 
-      <div id="errorMessage" class="error-msg"></div>
-      <div id="successMessage" class="success-msg"></div>
+      <div id="errorMessage" class="error-msg" role="alert" aria-live="assertive"></div>
+      <div id="successMessage" class="success-msg" role="status" aria-live="polite"></div>
 
       <div class="form-group">
         <label for="username" class="form-label">Username</label>
-        <input type="text" id="username" class="form-control" placeholder="Choose a username" required autocomplete="username" />
+        <input type="text" id="username" class="form-control"
+               placeholder="Choose a username (min 2 chars)"
+               required autocomplete="username"
+               aria-required="true" minlength="2" />
       </div>
 
       <div class="form-group">
         <label for="email" class="form-label">Email Address</label>
-        <input type="email" id="email" class="form-control" placeholder="Enter your email" required autocomplete="email" />
+        <input type="email" id="email" class="form-control"
+               placeholder="Enter your email"
+               required autocomplete="email"
+               aria-required="true" />
       </div>
 
       <div class="form-group">
         <label for="password" class="form-label">Password</label>
-        <input type="password" id="password" class="form-control" placeholder="Choose a password (min 6 chars)" required autocomplete="new-password" />
-        <div id="strengthBar" style="margin-top:6px;height:4px;border-radius:4px;background:#e5e5e5;overflow:hidden;">
-          <div id="strengthFill" style="height:100%;width:0;transition:all 0.3s;border-radius:4px;"></div>
+        <div style="position:relative;">
+          <input type="password" id="password" class="form-control"
+                 placeholder="Min 6 characters"
+                 required autocomplete="new-password"
+                 aria-required="true"
+                 aria-describedby="strengthText"
+                 style="padding-right:44px;" />
+          <button type="button" id="togglePwd" aria-label="Show password"
+                  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:4px;line-height:1;">👁</button>
         </div>
-        <small id="strengthText" style="font-size:0.78rem;color:#9ca3af;margin-top:3px;display:block;"></small>
+        <div class="strength-bar-track" aria-hidden="true">
+          <div class="strength-bar-fill" id="strengthFill"></div>
+        </div>
+        <span class="strength-label" id="strengthText" aria-live="polite"></span>
       </div>
 
       <div class="form-group">
         <label for="confirmPassword" class="form-label">Confirm Password</label>
-        <input type="password" id="confirmPassword" class="form-control" placeholder="Repeat your password" required autocomplete="new-password" />
+        <input type="password" id="confirmPassword" class="form-control"
+               placeholder="Repeat your password"
+               required autocomplete="new-password"
+               aria-required="true" />
       </div>
 
-      <button type="submit" class="login-btn" id="submitBtn">Sign Up</button>
+      <button type="submit" class="login-btn" id="submitBtn">Create Account</button>
 
       <div class="auth-switch">
         <p>Already have an account? <a href="/">Login</a></p>
@@ -53,7 +74,16 @@
   </div>
 
   <script>
-    // Password strength checker
+    // Password visibility toggle
+    document.getElementById('togglePwd').addEventListener('click', function() {
+      const pwd = document.getElementById('password');
+      const isHidden = pwd.type === 'password';
+      pwd.type = isHidden ? 'text' : 'password';
+      this.textContent = isHidden ? '🙈' : '👁';
+      this.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+
+    // Password strength
     document.getElementById('password').addEventListener('input', function() {
       const val = this.value;
       const fill = document.getElementById('strengthFill');
@@ -66,7 +96,7 @@
       if (/[^A-Za-z0-9]/.test(val)) strength++;
 
       const levels = [
-        { pct: '0%', color: '#e5e5e5', label: '' },
+        { pct: '0%', color: 'var(--gray-200)', label: '' },
         { pct: '25%', color: '#ef4444', label: 'Weak' },
         { pct: '50%', color: '#f97316', label: 'Fair' },
         { pct: '75%', color: '#eab308', label: 'Good' },
@@ -80,6 +110,16 @@
       text.style.color = level.color;
     });
 
+    // Real-time confirm password match
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+      const pwd = document.getElementById('password').value;
+      if (this.value && this.value !== pwd) {
+        this.setAttribute('aria-invalid', 'true');
+      } else {
+        this.removeAttribute('aria-invalid');
+      }
+    });
+
     document.getElementById('signupForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -91,16 +131,17 @@
       const successEl = document.getElementById('successMessage');
       const btn = document.getElementById('submitBtn');
 
-      // Client-side validation
-      if (!username || !email || !password || !confirmPassword) {
-        return showError('Please fill in all fields.');
-      }
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+
+      if (!username || !email || !password || !confirmPassword) return showError('Please fill in all fields.');
       if (username.length < 2) return showError('Username must be at least 2 characters.');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
       if (password.length < 6) return showError('Password must be at least 6 characters.');
       if (password !== confirmPassword) return showError('Passwords do not match.');
 
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Creating account…';
+      btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Creating account…';
 
       try {
         const res = await fetch('/api/auth/signup', {
@@ -118,7 +159,7 @@
           showError(data.message || 'Could not create account.');
           resetBtn();
         }
-      } catch (err) {
+      } catch {
         showError('Unable to connect to server. Please try again.');
         resetBtn();
       }
@@ -126,12 +167,11 @@
       function showError(msg) {
         errorEl.textContent = '❌ ' + msg;
         errorEl.style.display = 'block';
-        setTimeout(() => errorEl.style.display = 'none', 4000);
+        setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
       }
-
       function resetBtn() {
         btn.disabled = false;
-        btn.innerHTML = 'Sign Up';
+        btn.innerHTML = 'Create Account';
       }
     });
   </script>

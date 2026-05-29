@@ -6,474 +6,240 @@
   <title>DATH CUSSIN – Table Reservations</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
-
     :root {
-      --cream: #f5f0e6;
-      --brown: #8b4513;
-      --navy: #1e3a8a;
-      --dark-navy: #152a6b;
-      --tan: #d2b48c;
-      --orange: #d2691e;
-      --white: #ffffff;
-      --gray-50: #fafafa;
-      --green: #10b981;
-      --red: #ef4444;
+      --cream:#f5f0e6; --brown:#8b4513; --navy:#1e3a8a; --dark-navy:#152a6b;
+      --tan:#d2b48c; --orange:#d2691e; --white:#ffffff; --gray-50:#fafafa;
+      --green:#10b981; --red:#ef4444; --focus:0 0 0 3px rgba(30,58,138,.35);
+    }
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    .skip-link{position:absolute;top:-999px;left:0;padding:8px 16px;background:var(--navy);color:white;font-weight:600;z-index:10000;border-radius:0 0 8px 0}
+    .skip-link:focus{top:0}
+
+    body.dark-mode{--cream:#2d2d2d;--white:#1a1a1a;--gray-50:#1a1a1a;--brown:#d4a574;color:#f0f0f0}
+    body.dark-mode .form-section{background:#2d2d2d;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+    body.dark-mode .form-group input,body.dark-mode .form-group select,body.dark-mode textarea{background:#333;color:#f0f0f0;border-color:#555}
+    body.dark-mode .table-card{background:#2d2d2d;border-color:#444}
+    body.dark-mode .table-card.selected{background:rgba(16,185,129,.15)}
+    body.dark-mode .table-info{color:#aaa}
+    body.dark-mode .reservation-item{background:#2d2d2d}
+    body.dark-mode .reservation-info p{color:#aaa}
+    body.dark-mode .page-header p{color:#aaa}
+    body.dark-mode .form-section h2{color:var(--brown)}
+
+    body{
+      font-family:'DM Sans',sans-serif; padding-top:70px;
+      background-color:var(--gray-50);
+      background-image:url('https://image2url.com/r2/default/images/1767373054909-68d9bc27-bd80-4c0f-9367-1f0bd0f46ea6.png');
+      background-size:cover; background-attachment:fixed; min-height:100vh;
     }
 
-    body.dark-mode {
-      --cream: #2d2d2d;
-      --white: #1a1a1a;
-      --gray-50: #1a1a1a;
-      --brown: #d4a574;
-      color: #f0f0f0;
+    .navbar{
+      position:fixed;top:0;left:0;width:100%;
+      display:flex;justify-content:space-between;align-items:center;
+      background-color:var(--cream);padding:12px 28px;
+      box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:1000;
     }
+    .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--brown);letter-spacing:2px}
+    .navbar-right{display:flex;align-items:center;gap:15px}
+    .nav-link{text-decoration:none;color:var(--brown);font-weight:600;font-size:14px;transition:color .2s}
+    .nav-link:hover{color:var(--orange)}
+    .nav-link:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,58,138,.35);border-radius:4px}
+    .theme-toggle{background:none;border:2px solid var(--brown);color:var(--brown);padding:8px 12px;border-radius:6px;font-size:18px;cursor:pointer;transition:all .2s}
+    .theme-toggle:hover{background:var(--brown);color:white}
+    .theme-toggle:focus-visible{outline:none;box-shadow:var(--focus)}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .container{max-width:1200px;margin:0 auto;padding:28px}
+    .page-header{margin-bottom:32px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--brown);margin-bottom:8px}
+    .page-header p{color:#666;font-size:1.1rem}
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      padding-top: 70px;
-      background-color: var(--gray-50);
-      background-image: url('https://image2url.com/r2/default/images/1767373054909-68d9bc27-bd80-4c0f-9367-1f0bd0f46ea6.png');
-      background-size: cover;
-      background-attachment: fixed;
-      min-height: 100vh;
+    .form-section{background:var(--white);border-radius:12px;padding:28px;margin-bottom:32px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .form-section h2{font-size:1.4rem;color:var(--brown);margin-bottom:20px;border-bottom:2px solid var(--cream);padding-bottom:12px}
+    body.dark-mode .form-section h2{border-bottom-color:#444}
+
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px}
+    .form-group{display:flex;flex-direction:column}
+    .form-group label{font-weight:600;margin-bottom:6px;color:var(--brown);font-size:.9rem}
+    .form-group input,.form-group select{
+      padding:10px 12px;border:1.5px solid #ddd;border-radius:6px;
+      font-family:'DM Sans',sans-serif;font-size:14px;background:var(--white);color:#333;
+      transition:border-color .2s,box-shadow .2s;
     }
-
-    /* ── Navbar ── */
-    .navbar {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: var(--cream);
-      padding: 12px 28px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-      z-index: 1000;
+    .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--navy);box-shadow:var(--focus)}
+    .form-group input[aria-invalid="true"]{border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.2)}
+    textarea{
+      padding:10px 12px;border:1.5px solid #ddd;border-radius:6px;
+      font-family:'DM Sans',sans-serif;font-size:14px;min-height:80px;
+      resize:vertical;width:100%;transition:border-color .2s,box-shadow .2s;
+      background:var(--white);color:#333;
     }
+    textarea:focus{outline:none;border-color:var(--navy);box-shadow:var(--focus)}
 
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      font-weight: 900;
-      color: var(--brown);
-      letter-spacing: 2px;
+    .btn{padding:12px 24px;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+    .btn:focus-visible{outline:none;box-shadow:var(--focus)}
+    .btn-primary{background:var(--navy);color:white}
+    .btn-primary:hover{background:var(--dark-navy)}
+    .btn-primary:disabled{background:#d1d5db;color:#9ca3af;cursor:not-allowed}
+    .btn-secondary{background:var(--tan);color:#1a1a1a}
+    .btn-secondary:hover{background:#c19a6b}
+
+    /* Loading state for availability button */
+    .btn-loading{position:relative;color:transparent!important}
+    .btn-loading::after{
+      content:'';position:absolute;top:50%;left:50%;
+      width:16px;height:16px;margin:-8px 0 0 -8px;
+      border:2px solid rgba(255,255,255,.4);border-top-color:white;
+      border-radius:50%;animation:spin .6s linear infinite;
     }
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    .navbar-right { display: flex; align-items: center; gap: 15px; }
-
-    .nav-link {
-      text-decoration: none;
-      color: var(--brown);
-      font-weight: 600;
-      font-size: 14px;
-      transition: color 0.2s;
+    .tables-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:24px}
+    .table-card{
+      background:var(--white);border:2px solid #e5e5e5;border-radius:10px;
+      padding:20px;cursor:pointer;transition:all .2s;text-align:center;
     }
-    .nav-link:hover { color: var(--orange); }
+    .table-card:hover{border-color:var(--navy);box-shadow:0 4px 12px rgba(30,58,138,.15)}
+    .table-card:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,58,138,.35)}
+    .table-card.selected{border-color:var(--green);background:rgba(16,185,129,.05)}
+    .table-card.selected:focus-visible{box-shadow:0 0 0 3px rgba(16,185,129,.4)}
+    .table-number{font-size:1.8rem;font-weight:900;color:var(--brown);margin-bottom:8px}
+    .table-info{font-size:.9rem;color:#666;margin-bottom:10px}
+    .table-price{font-size:1.2rem;color:var(--green);font-weight:700;margin-top:10px}
+    .selected-badge{display:none;margin-top:8px;font-size:12px;color:var(--green);font-weight:700}
+    .table-card.selected .selected-badge{display:block}
 
-    .theme-toggle {
-      background: none;
-      border: 2px solid var(--brown);
-      color: var(--brown);
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.2s;
+    .reservation-item{
+      background:var(--white);border-left:4px solid var(--navy);border-radius:8px;
+      padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;
     }
-    .theme-toggle:hover { background: var(--brown); color: white; }
-
-    /* ── Main Content ── */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 28px;
+    .reservation-item.cancelled{border-left-color:var(--red);opacity:.6}
+    .reservation-info h3{font-size:1.1rem;color:var(--brown);margin-bottom:4px}
+    .reservation-info p{font-size:.9rem;color:#666;margin:2px 0}
+    .reservation-status{
+      padding:6px 12px;border-radius:4px;font-size:.85rem;font-weight:600;text-transform:uppercase;
+      flex-shrink:0;
     }
+    .status-confirmed{background:rgba(16,185,129,.1);color:var(--green)}
+    .status-pending{background:rgba(251,146,60,.1);color:#f97316}
+    .status-cancelled{background:rgba(239,68,68,.1);color:var(--red)}
 
-    .page-header {
-      margin-bottom: 32px;
-    }
+    .alert{padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:.9rem;display:none;animation:slideIn .25s ease}
+    .alert.show{display:block}
+    .alert-error{background:rgba(239,68,68,.1);border-left:4px solid var(--red);color:var(--red)}
+    .alert-success{background:rgba(16,185,129,.1);border-left:4px solid var(--green);color:var(--green)}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
-    .page-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.5rem;
-      color: var(--brown);
-      margin-bottom: 8px;
-    }
+    .loading-state{text-align:center;padding:40px 20px;color:#9ca3af}
+    .empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
 
-    .page-header p {
-      color: #666;
-      font-size: 1.1rem;
-    }
-
-    body.dark-mode .page-header p {
-      color: #aaa;
-    }
-
-    /* ── Form Section ── */
-    .form-section {
-      background: var(--white);
-      border-radius: 12px;
-      padding: 28px;
-      margin-bottom: 32px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    body.dark-mode .form-section {
-      background: #2d2d2d;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-
-    .form-section h2 {
-      font-size: 1.4rem;
-      color: var(--brown);
-      margin-bottom: 20px;
-      border-bottom: 2px solid var(--cream);
-      padding-bottom: 12px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .form-group label {
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--brown);
-      font-size: 0.9rem;
-    }
-
-    .form-group input,
-    .form-group select {
-      padding: 10px 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      background: var(--white);
-      color: #333;
-    }
-
-    body.dark-mode .form-group input,
-    body.dark-mode .form-group select {
-      background: #333;
-      color: #f0f0f0;
-      border-color: #555;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: var(--navy);
-      box-shadow: 0 0 0 3px rgba(30,58,138,0.1);
-    }
-
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-
-    .btn-primary {
-      background: var(--navy);
-      color: white;
-    }
-    .btn-primary:hover { background: var(--dark-navy); }
-
-    .btn-secondary {
-      background: var(--tan);
-      color: #1a1a1a;
-    }
-    .btn-secondary:hover { background: #c19a6b; }
-
-    /* ── Tables Grid ── */
-    .tables-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .table-card {
-      background: var(--white);
-      border: 2px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    body.dark-mode .table-card {
-      background: #2d2d2d;
-      border-color: #444;
-    }
-
-    .table-card:hover {
-      border-color: var(--navy);
-      box-shadow: 0 4px 12px rgba(30,58,138,0.15);
-    }
-
-    .table-card.selected {
-      border-color: var(--green);
-      background: rgba(16,185,129,0.05);
-    }
-
-    body.dark-mode .table-card.selected {
-      background: rgba(16,185,129,0.15);
-    }
-
-    .table-number {
-      font-size: 1.8rem;
-      font-weight: 900;
-      color: var(--brown);
-      margin-bottom: 8px;
-    }
-
-    .table-info {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 10px;
-    }
-
-    body.dark-mode .table-info {
-      color: #aaa;
-    }
-
-    .table-price {
-      font-size: 1.2rem;
-      color: var(--green);
-      font-weight: 700;
-      margin-top: 10px;
-    }
-
-    .table-card.unavailable {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: #f3f4f6;
-    }
-
-    body.dark-mode .table-card.unavailable {
-      background: #333;
-      opacity: 0.4;
-    }
-
-    .unavailable-badge {
-      display: inline-block;
-      background: var(--red);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    /* ── Reservations List ── */
-    .reservations-list {
-      margin-top: 24px;
-    }
-
-    .reservation-item {
-      background: var(--white);
-      border-left: 4px solid var(--navy);
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    body.dark-mode .reservation-item {
-      background: #2d2d2d;
-    }
-
-    .reservation-item.cancelled {
-      border-left-color: var(--red);
-      opacity: 0.6;
-    }
-
-    .reservation-info h3 {
-      font-size: 1.1rem;
-      color: var(--brown);
-      margin-bottom: 4px;
-    }
-
-    .reservation-info p {
-      font-size: 0.9rem;
-      color: #666;
-      margin: 2px 0;
-    }
-
-    body.dark-mode .reservation-info p {
-      color: #aaa;
-    }
-
-    .reservation-status {
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    .status-confirmed { background: rgba(16,185,129,0.1); color: var(--green); }
-    .status-pending { background: rgba(251,146,60,0.1); color: #f97316; }
-    .status-cancelled { background: rgba(239,68,68,0.1); color: var(--red); }
-
-    .loading {
-      text-align: center;
-      padding: 40px 20px;
-      color: #999;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #9ca3af;
-    }
-
-    .error-message {
-      background: rgba(239,68,68,0.1);
-      border-left: 4px solid var(--red);
-      color: var(--red);
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-
-    .success-message {
-      background: rgba(16,185,129,0.1);
-      border-left: 4px solid var(--green);
-      color: var(--green);
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 768px) {
-      .container { padding: 16px; }
-      .page-header h1 { font-size: 1.8rem; }
-      .form-grid { grid-template-columns: 1fr; }
-      .tables-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-      .navbar-right { gap: 8px; }
-      .nav-link { display: none; }
+    @media(max-width:768px){
+      .container{padding:16px}
+      .page-header h1{font-size:1.8rem}
+      .form-grid{grid-template-columns:1fr}
+      .tables-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+      .navbar-right{gap:8px}
+      .nav-link{display:none}
+      .reservation-item{flex-direction:column;align-items:flex-start;gap:12px}
     }
   </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to reservations</a>
 
-  <nav class="navbar">
+  <nav class="navbar" aria-label="Main navigation">
     <span class="logo">DATH CUSSIN</span>
     <div class="navbar-right">
       <a class="nav-link" href="/pages/home.html">Menu</a>
-      <a class="nav-link" href="/pages/reservations.html">Reservations</a>
       <a class="nav-link" href="/pages/cart.html">Cart</a>
-      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">🌙</button>
     </div>
   </nav>
 
-  <div class="container">
-    <!-- Page Header -->
+  <main id="main" class="container">
     <div class="page-header">
       <h1>Reserve a Table</h1>
       <p>Experience authentic Ghanaian cuisine at DATH CUSSIN</p>
     </div>
 
     <!-- Booking Form -->
-    <div class="form-section">
+    <section class="form-section" aria-label="Make a reservation">
       <h2>📅 Make a Reservation</h2>
-      
-      <div id="formMessages"></div>
+
+      <div id="formAlert" class="alert" role="alert" aria-live="assertive"></div>
 
       <div class="form-grid">
         <div class="form-group">
-          <label for="reservationDate">Date</label>
-          <input type="date" id="reservationDate" min="" required />
+          <label for="reservationDate">Date <span aria-hidden="true" style="color:var(--red)">*</span></label>
+          <input type="date" id="reservationDate" required aria-required="true" />
         </div>
         <div class="form-group">
-          <label for="reservationTime">Time</label>
-          <input type="time" id="reservationTime" required />
+          <label for="reservationTime">Time <span aria-hidden="true" style="color:var(--red)">*</span></label>
+          <input type="time" id="reservationTime" required aria-required="true" />
         </div>
         <div class="form-group">
-          <label for="guestCount">Number of Guests</label>
-          <input type="number" id="guestCount" min="1" max="12" value="2" required />
+          <label for="guestCount">Number of Guests <span aria-hidden="true" style="color:var(--red)">*</span></label>
+          <input type="number" id="guestCount" min="1" max="12" value="2" required aria-required="true" />
         </div>
         <div class="form-group">
           <label for="customerName">Your Name</label>
-          <input type="text" id="customerName" placeholder="Full name" />
+          <input type="text" id="customerName" placeholder="Full name" autocomplete="name" />
         </div>
         <div class="form-group">
           <label for="customerPhone">Phone Number</label>
-          <input type="tel" id="customerPhone" placeholder="+233..." />
+          <input type="tel" id="customerPhone" placeholder="+233…" autocomplete="tel" />
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="reservationNotes">Special Requests (Optional)</label>
-        <textarea id="reservationNotes" placeholder="Any dietary restrictions or preferences?" style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
+      <div class="form-group" style="margin-bottom:20px">
+        <label for="reservationNotes">Special Requests <span style="font-weight:400;color:#9ca3af">(Optional)</span></label>
+        <textarea id="reservationNotes" placeholder="Any dietary restrictions or preferences?"></textarea>
       </div>
 
-      <button class="btn btn-primary" onclick="searchAvailableTables()" style="margin-top: 16px;">🔍 Check Availability</button>
-    </div>
+      <button class="btn btn-primary" id="checkAvailBtn" onclick="searchAvailableTables()">🔍 Check Availability</button>
+    </section>
 
     <!-- Available Tables -->
-    <div class="form-section" id="tablesSection" style="display:none;">
+    <section class="form-section" id="tablesSection" style="display:none;" aria-label="Available tables" aria-live="polite">
       <h2>📍 Available Tables</h2>
-      <div id="tablesContainer" class="tables-grid">
-        <div class="loading">Loading tables...</div>
+      <p style="color:#6b7280;margin-bottom:8px;font-size:14px">Select a table to reserve.</p>
+      <div id="tablesContainer" class="tables-grid"></div>
+      <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" onclick="completeReservation()" id="reserveBtn" style="display:none">✓ Complete Reservation</button>
+        <button class="btn btn-secondary" onclick="hideTablesSection()">← Change Search</button>
       </div>
-      <button class="btn btn-primary" onclick="completeReservation()" style="margin-top: 20px; display:none;" id="reserveBtn">✓ Complete Reservation</button>
-    </div>
+    </section>
 
     <!-- My Reservations -->
-    <div class="form-section">
+    <section class="form-section" aria-label="Your reservations">
       <h2>📋 Your Reservations</h2>
-      <div id="reservationsContainer" class="loading">Loading reservations...</div>
-    </div>
-  </div>
+      <div id="reservationsContainer" class="loading-state" aria-live="polite">Loading reservations…</div>
+    </section>
+  </main>
 
   <script>
     let selectedTableId = null;
-    let currentUser = null;
 
-    // ── Theme Toggle ──
+    // Theme
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('darkMode', isDark);
-      document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+      const dark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', dark);
+      document.querySelector('.theme-toggle').textContent = dark ? '☀️' : '🌙';
     }
 
     window.addEventListener('load', () => {
-      const isDark = localStorage.getItem('darkMode') === 'true';
-      if (isDark) {
+      if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
         document.querySelector('.theme-toggle').textContent = '☀️';
       }
-      
-      // Set minimum date to today
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('reservationDate').min = today;
       document.getElementById('reservationDate').value = today;
-
+      // Default time to next hour
+      const now = new Date();
+      now.setHours(now.getHours() + 1, 0, 0, 0);
+      document.getElementById('reservationTime').value = now.toTimeString().slice(0, 5);
       initAuth();
     });
 
@@ -481,22 +247,24 @@
       try {
         const res = await fetch('/api/auth/me');
         const data = await res.json();
-        if (data.loggedIn) {
-          currentUser = data.user;
-          document.getElementById('customerName').value = data.user.username;
-          loadMyReservations();
-        } else {
-          window.location.href = '/';
-        }
-      } catch {
-        window.location.href = '/';
-      }
+        if (!data.loggedIn) { window.location.href = '/'; return; }
+        document.getElementById('customerName').value = data.user.username;
+        loadMyReservations();
+      } catch { window.location.href = '/'; }
     }
 
-    function showMessage(msg, type) {
-      const container = document.getElementById('formMessages');
-      const className = type === 'error' ? 'error-message' : 'success-message';
-      container.innerHTML = `<div class="${className}">${msg}</div>`;
+    function showAlert(msg, type) {
+      const el = document.getElementById('formAlert');
+      el.textContent = msg;
+      el.className = 'alert alert-' + type + ' show';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (type === 'success') setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function hideTablesSection() {
+      document.getElementById('tablesSection').style.display = 'none';
+      selectedTableId = null;
+      document.getElementById('checkAvailBtn').focus();
     }
 
     async function searchAvailableTables() {
@@ -504,48 +272,74 @@
       const time = document.getElementById('reservationTime').value;
       const guests = document.getElementById('guestCount').value;
 
-      if (!date || !time || !guests) {
-        showMessage('Please fill in all fields', 'error');
-        return;
-      }
+      // Validation
+      let hasError = false;
+      ['reservationDate','reservationTime','guestCount'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value) { el.setAttribute('aria-invalid','true'); hasError = true; }
+        else el.removeAttribute('aria-invalid');
+      });
+      if (hasError) { showAlert('Please fill in date, time, and number of guests.', 'error'); return; }
+
+      const btn = document.getElementById('checkAvailBtn');
+      btn.disabled = true;
+      btn.classList.add('btn-loading');
+      btn.setAttribute('aria-busy', 'true');
 
       try {
         const res = await fetch(`/api/tables/available?date=${date}&time=${time}&guests=${guests}`);
         const data = await res.json();
 
-        document.getElementById('tablesSection').style.display = 'block';
-        const container = document.getElementById('tablesContainer');
+        const section = document.getElementById('tablesSection');
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior: 'smooth' });
+        selectedTableId = null;
+        document.getElementById('reserveBtn').style.display = 'none';
 
-        if (data.tables.length === 0) {
-          container.innerHTML = '<div class="empty-state">No available tables for this time.</div>';
+        const container = document.getElementById('tablesContainer');
+        if (!data.tables || !data.tables.length) {
+          container.innerHTML = '<div class="empty-state">😕 No tables available for this date and time.<br><span style="font-size:14px">Try a different time or date.</span></div>';
           return;
         }
 
         container.innerHTML = data.tables.map(t => `
-          <div class="table-card" id="table-${t.id}" onclick="selectTable(${t.id}, this)">
+          <div class="table-card" id="table-${t.id}" role="radio" aria-checked="false" tabindex="0"
+               onclick="selectTable(${t.id}, this)"
+               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectTable(${t.id},this)}"
+               aria-label="Table ${t.table_number}, capacity ${t.capacity}, GH₵${Number(t.price).toFixed(2)}">
             <div class="table-number">${t.table_number}</div>
-            <div class="table-info">👥 Capacity: ${t.capacity}</div>
-            <div class="table-price">GH₵${t.price.toFixed(2)}</div>
-          </div>
-        `).join('');
-
-        document.getElementById('reserveBtn').style.display = 'inline-block';
+            <div class="table-info">👥 Up to ${t.capacity} guests</div>
+            <div class="table-price">GH₵${Number(t.price).toFixed(2)}</div>
+            <div class="selected-badge" aria-hidden="true">✓ Selected</div>
+          </div>`).join('');
       } catch (err) {
-        showMessage('Error loading tables: ' + err.message, 'error');
+        showAlert('Error loading tables. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('btn-loading');
+        btn.removeAttribute('aria-busy');
       }
     }
 
     function selectTable(tableId, element) {
-      document.querySelectorAll('.table-card').forEach(el => el.classList.remove('selected'));
+      document.querySelectorAll('.table-card').forEach(el => {
+        el.classList.remove('selected');
+        el.setAttribute('aria-checked', 'false');
+      });
       element.classList.add('selected');
+      element.setAttribute('aria-checked', 'true');
       selectedTableId = tableId;
+      const btn = document.getElementById('reserveBtn');
+      btn.style.display = 'inline-block';
+      btn.focus();
     }
 
     async function completeReservation() {
-      if (!selectedTableId) {
-        showMessage('Please select a table', 'error');
-        return;
-      }
+      if (!selectedTableId) { showAlert('Please select a table.', 'error'); return; }
+
+      const btn = document.getElementById('reserveBtn');
+      btn.disabled = true;
+      btn.classList.add('btn-loading');
 
       const reservation = {
         table_id: selectedTableId,
@@ -563,51 +357,50 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reservation)
         });
-
         const data = await res.json();
         if (data.success) {
-          showMessage('✓ Reservation confirmed! We look forward to your visit.', 'success');
+          showAlert('✓ Reservation confirmed! We look forward to your visit.', 'success');
           selectedTableId = null;
           document.getElementById('tablesSection').style.display = 'none';
           document.getElementById('reservationNotes').value = '';
           loadMyReservations();
         } else {
-          showMessage('Error: ' + (data.message || 'Failed to complete reservation'), 'error');
+          showAlert(data.message || 'Failed to complete reservation.', 'error');
         }
       } catch (err) {
-        showMessage('Error: ' + err.message, 'error');
+        showAlert('Server error. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('btn-loading');
       }
     }
 
     async function loadMyReservations() {
+      const container = document.getElementById('reservationsContainer');
+      container.innerHTML = '<div class="loading-state">Loading…</div>';
       try {
         const res = await fetch('/api/reservations/my');
         const data = await res.json();
-
-        const container = document.getElementById('reservationsContainer');
-        if (data.reservations.length === 0) {
+        if (!data.reservations.length) {
           container.innerHTML = '<div class="empty-state">You have no reservations yet.</div>';
           return;
         }
-
         container.innerHTML = data.reservations
           .sort((a, b) => new Date(b.reservation_date) - new Date(a.reservation_date))
-          .map(res => `
-            <div class="reservation-item ${res.status === 'cancelled' ? 'cancelled' : ''}">
+          .map(r => `
+            <div class="reservation-item ${r.status === 'cancelled' ? 'cancelled' : ''}">
               <div class="reservation-info">
-                <h3>Table ${res.table_number} • ${res.guest_count} guests</h3>
-                <p>📅 ${new Date(res.reservation_date).toLocaleDateString()} at ${res.reservation_time}</p>
-                <p>💰 GH₵${res.price.toFixed(2)}</p>
-                <p style="margin-top: 6px;">${res.notes ? '📝 ' + res.notes : ''}</p>
+                <h3>Table ${r.table_number} &bull; ${r.guest_count} guest${r.guest_count > 1 ? 's' : ''}</h3>
+                <p>📅 ${new Date(r.reservation_date + 'T00:00:00').toLocaleDateString('en-GH', { weekday:'long', year:'numeric', month:'long', day:'numeric' })} at ${r.reservation_time}</p>
+                <p>💰 GH₵${Number(r.price).toFixed(2)}</p>
+                ${r.notes ? `<p style="margin-top:4px;font-style:italic">📝 ${r.notes}</p>` : ''}
               </div>
-              <div class="reservation-status status-${res.status}">${res.status}</div>
-            </div>
-          `).join('');
+              <span class="reservation-status status-${r.status}" aria-label="Status: ${r.status}">${r.status}</span>
+            </div>`).join('');
       } catch (err) {
-        document.getElementById('reservationsContainer').innerHTML = `<div class="error-message">Error loading reservations: ${err.message}</div>`;
+        container.innerHTML = '<div class="alert alert-error show">Error loading reservations. Please refresh.</div>';
       }
     }
   </script>
-
 </body>
 </html>
